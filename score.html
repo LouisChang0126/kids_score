@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>加分頁面</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+</head>
+<body>
+  <h1 class="title">加分功能</h1>
+  <div id="students-scores"></div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th class="title">寶貝</th>
+        <th class="title">今天點數</th>
+        <th class="title">+1</th>
+        <th class="title">+3</th>
+        <th class="title">0</th>
+      </tr>
+    </thead>
+    <tbody id="panel">
+
+    </tbody>
+  </table>
+  <!--table-->
+</body>
+<script src="init_firestore.js" ></script>
+<script src="score.js" ></script>
+</html>

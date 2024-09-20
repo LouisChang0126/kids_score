@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>點數展示頁面</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+</head>
+<body>
+  <section class="section">
+    <div class="container">
+      <h1 class="title">今日學生分數</h1>
+      <div id="students-scores-display"></div>
+    </div>
+  </section>
+
+  <script>
+    const today = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+
+    // 從 serve collection 抓取當天資料
+    db.collection('serve').doc(today).get().then(doc => {
+      if (doc.exists) {
+        const data = doc.data();
+        const studentsScoresDiv = document.getElementById('students-scores-display');
+
+        Object.keys(data).forEach(student => {
+          const studentDiv = document.createElement('div');
+          studentDiv.className = 'box';
+
+          const studentName = document.createElement('h2');
+          studentName.className = 'title is-4';
+          studentName.textContent = student;
+          studentDiv.appendChild(studentName);
+
+          const score = document.createElement('p');
+          score.textContent = `分數: ${data[student]}`;
+          studentDiv.appendChild(score);
+
+          studentsScoresDiv.appendChild(studentDiv);
+        });
+      } else {
+        alert("今天尚未點名！");
+      }
+    });
+  </script>
+</body>
+</html>
