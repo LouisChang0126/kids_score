@@ -2,14 +2,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>點名頁面</title>
+  <title>松福兒崇點數系統</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
   <script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 </head>
 <body>
-  <h1 class="title">學生點名</h1>
+  <nav class="breadcrumb is-large is-centered" aria-label="breadcrumbs">
+    <ul>
+      <li class="is-active"><a href="#" aria-current="page">簽到</a></li>
+      <li><a href="score.html">加分</a></li>
+      <li><a href="newfriend.html">新朋友</a></li>
+      <li><a href="display.html">結算</a></li>
+    </ul>
+  </nav>
+  <h1 class="title">簽到</h1>
   <div id="students"></div>
 </body>
 <script src="init_firestore.js" ></script>
