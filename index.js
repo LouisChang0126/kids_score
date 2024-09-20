@@ -23,21 +23,29 @@ async function load_all_students() {
 function createButton(studentNames) {
   const studentsDiv = document.getElementById('students');
   studentsDiv.innerHTML = '';  // 清空之前的按钮，以便重新创建
-  studentNames.forEach(studentName => {
-    const studentButton = document.createElement('button');
-    studentButton.className = 'button is-large is-info m-2';
-    studentButton.textContent = studentName;
+  if(studentNames.length === 0){
+    const nobody = document.createElement('h1');
+    nobody.className = 'title is-1';
+    nobody.textContent = "大家都到囉!!!";
+    studentsDiv.appendChild(nobody);
+  }
+  else{
+    studentNames.forEach(studentName => {
+      const studentButton = document.createElement('button');
+      studentButton.className = 'button is-large is-info m-2';
+      studentButton.textContent = studentName;
 
-    // 點名按鈕功能
-    studentButton.onclick = async () => {
-      const snapshot = await db.collection('serve').doc(today).set({ [studentName]: 0 }, { merge: true });
-      alert(`${studentName} 簽到成功!`);
-      window.location.reload();
-    };
+      // 點名按鈕功能
+      studentButton.onclick = async () => {
+        const snapshot = await db.collection('serve').doc(today).set({ [studentName]: 0 }, { merge: true });
+        alert(`${studentName} 簽到成功!`);
+        window.location.reload();
+      };
 
-    studentsDiv.appendChild(studentButton);
-    // studentsDiv.appendChild(document.createElement('br'));
-  });
+      studentsDiv.appendChild(studentButton);
+      // studentsDiv.appendChild(document.createElement('br'));
+    });
+  }
 }
 
 async function printDifference() {
