@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>點數展示頁面</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+</head>
+<style>
+    .clock {
+    display: flex;
+    }
+    .clock-item{
+    display: flex;
+    margin: 5px;
+    width: 100px;
+    line-height: 70px;
+    font-size: 48px;
+    justify-content: center;
+    }
+    .clock-item {
+    border: 2px solid Chocolate;
+    overflow: hidden;
+    }
+</style>
+<style>
+    .is-active .clock-txt {
+      animation: clockSlide 1s infinite;
+    }
+  
+    @keyframes clockSlide {
+      0% {
+        transform: translateY(-100%);
+      }
+      25%, 75% {
+        transform: translateY(0);
+      }
+      100% {
+        transform: translateY(100%);
+      }
+    }
+  </style>
+<body>
+    <div class="clock is-active">
+        <div class="clock-item">
+            <div class="clock-txt" id="sec-2">-</div>
+        </div>
+    </div>
+    <h1 id="count"></h1>
+</body>
+<script>
+    function setTimeTxt(date) {
+      document.getElementById('sec-2').innerText = counter;// date.getSeconds() % 10
+      document.getElementById('count').innerText = counter;
+    }
+  
+    function setClock() {
+      setInterval(() => {
+        const date = new Date();
+        setTimeTxt(date);
+        toggleAnimation(date);
+      }, 1000);
+    }
+  
+    setClock();
+</script>
+<script>
+    function toggleAnimation(date) {
+      setTimeout(() => {
+        if (
+          (date.getHours() % 10 === 9 || date.getHours() === 23) && 
+          date.getMinutes() % 60 === 59 && 
+          date.getSeconds() % 60 === 59
+        ) {
+          document.getElementById('hour-1').style.animationPlayState = "running"
+        } else {
+          document.getElementById('hour-1').style.animationPlayState = "paused"
+        }
+  
+        if (date.getMinutes() % 60 === 59  && date.getSeconds() % 60 === 59) {
+          document.getElementById('hour-2').style.animationPlayState = "running"
+        } else {
+          document.getElementById('hour-2').style.animationPlayState = "paused"
+        }
+  
+        if (date.getMinutes() % 10 === 9 && date.getSeconds() % 60 === 59) {
+          document.getElementById('min-1').style.animationPlayState = "running"
+        } else {
+          document.getElementById('min-1').style.animationPlayState = "paused"
+        }
+  
+        if (Math.floor(counter%100) === 0) {
+          document.getElementById('min-2').style.animationPlayState = "running"
+        } else {
+          document.getElementById('min-2').style.animationPlayState = "paused"
+        }
+  
+        if (Math.floor(counter % 10) === 0) {
+          document.getElementById('sec-1').style.animationPlayState = "running"
+        } else {
+          document.getElementById('sec-1').style.animationPlayState = "paused"
+        }
+      }, 250);
+    }
+</script>
+<script>
+    let counter = 100;
+
+    const intervalId = setInterval(function() {
+    counter += 10;
+    console.log(counter);  // 每 0.1 秒输出一次当前的计数
+    }, 1000);  // 100 毫秒 = 0.1 秒
+
+    // 如果你需要在某个条件下停止计数，比如计数到100时停止
+    // 可以使用 clearInterval(intervalId)
+
+    setTimeout(function() {
+    clearInterval(intervalId);
+    }, 100000); // 10 秒后停止计数
+    
+</script>
+</html>

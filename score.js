@@ -11,7 +11,6 @@ async function load_signin_stuff() {
 
 async function creatTable() {
   var signin_stuff = await load_signin_stuff();
-  // const studentsScoresDiv = document.getElementById('students-scores');
   const studentsScoresDiv = document.getElementById('panel');
   
   if (Object.keys(signin_stuff).length === 0) {
@@ -41,7 +40,7 @@ async function creatTable() {
       addButton.textContent = '+1';
       addButton.onclick = async () => {
         await db.collection('serve').doc(today).update({ [student]: point + 1 });
-        alert(`${student} 加 1 分`);
+        // alert(`${student} 加 1 分`);
         location.reload(); // 重新整理頁面
       };
       addtd.appendChild(addButton);
@@ -54,7 +53,7 @@ async function creatTable() {
       add3Button.textContent = '+3';
       add3Button.onclick = async () => {
         await db.collection('serve').doc(today).update({ [student]: point + 3 });
-        alert(`${student} 加 3 分`);
+        // alert(`${student} 加 3 分`);
         location.reload();
       };
       add3td.appendChild(add3Button);
@@ -72,6 +71,28 @@ async function creatTable() {
       };
       resetTd.appendChild(resetButton);
       studentDiv.appendChild(resetTd);
+
+      // 輸入
+      // <div class="field has-addons">
+      //   <div class="control">
+      //     <input class="input" type="text" placeholder="加分">
+      //   </div>
+      //   <div class="control">
+      //     <button class="button is-primary">送出</button>
+      //   </div>
+      // </div>
+      const inputTd = document.createElement('td');
+      inputTd.innerHTML = `
+      <div class="field has-addons">
+        <div class="control">
+          <input class="input is-large" style="width: 85px;" type="text" placeholder="加分">
+        </div>
+        <div class="control">
+          <button class="button is-primary is-large">送出</button>
+        </div>
+      </div>
+      `;
+      studentDiv.appendChild(inputTd);
 
       studentsScoresDiv.appendChild(studentDiv);
     });
