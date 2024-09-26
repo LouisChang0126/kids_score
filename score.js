@@ -41,7 +41,9 @@ async function creatTable() {
       addButton.onclick = async () => {
         await db.collection('serve').doc(today).update({ [student]: point + 1 });
         // alert(`${student} 加 1 分`);
-        location.reload(); // 重新整理頁面
+        // location.reload(); // 重新整理頁面
+        point = point + 1;
+        score.textContent = `+ ${point}`;
       };
       addtd.appendChild(addButton);
       studentDiv.appendChild(addtd);
@@ -54,7 +56,9 @@ async function creatTable() {
       add3Button.onclick = async () => {
         await db.collection('serve').doc(today).update({ [student]: point + 3 });
         // alert(`${student} 加 3 分`);
-        location.reload();
+        // location.reload();
+        point = point + 3;
+        score.textContent = `+ ${point}`;
       };
       add3td.appendChild(add3Button);
       studentDiv.appendChild(add3td);
@@ -66,32 +70,54 @@ async function creatTable() {
       resetButton.textContent = '歸零';
       resetButton.onclick = async () => {
         await db.collection('serve').doc(today).update({ [student]: 0 });
-        alert(`${student} 分數歸零`);
-        location.reload();
+        // alert(`${student} 分數歸零`);
+        // location.reload();
+        point = 0;
+        score.textContent = `+ ${point}`;
       };
       resetTd.appendChild(resetButton);
       studentDiv.appendChild(resetTd);
 
       // 輸入
+      const inputTd = document.createElement('td');
+      const inputD1 = document.createElement('div');
+      const inputD2 = document.createElement('div');
+      const inputD3 = document.createElement('div');
+      const inputInp = document.createElement('input');
+      const inputBtn = document.createElement('button');
+      inputD1.className = 'field has-addons';
+      inputD2.className = 'control';
+      inputD3.className = 'control';
+
+      inputInp.className = 'input is-large';
+      inputInp.type = 'text';
+      inputInp.placeholder = '加分';
+      inputInp.style.width = '85px';
+
+      inputBtn.className = 'button is-primary is-large';
+      inputBtn.textContent = '送出';
+      inputBtn.onclick = async () => {
+        await db.collection('serve').doc(today).update({ [student]: point +  Number(inputInp.value)});
+        point = point + Number(inputInp.value);
+        score.textContent = `+ ${point}`;
+        inputInp.value = "";
+      };
+      
+      // inputTd.innerHTML = `
       // <div class="field has-addons">
       //   <div class="control">
-      //     <input class="input" type="text" placeholder="加分">
+      //     <input class="input is-large" style="width: 85px;" type="text" placeholder="加分">
       //   </div>
-      //   <div class="control">
-      //     <button class="button is-primary">送出</button>
+      //   <div class="control" onclick="additionalAdd('${student}', ${point}, this.previousElementSibling.firstElementChild.value)">
+      //     <button class="button is-primary is-large">送出</button>
       //   </div>
       // </div>
-      const inputTd = document.createElement('td');
-      inputTd.innerHTML = `
-      <div class="field has-addons">
-        <div class="control">
-          <input class="input is-large" style="width: 85px;" type="text" placeholder="加分">
-        </div>
-        <div class="control">
-          <button class="button is-primary is-large">送出</button>
-        </div>
-      </div>
-      `;
+      // `;
+      inputTd.appendChild(inputD1);
+      inputD1.appendChild(inputD2);
+      inputD1.appendChild(inputD3);
+      inputD2.appendChild(inputInp);
+      inputD3.appendChild(inputBtn);
       studentDiv.appendChild(inputTd);
 
       studentsScoresDiv.appendChild(studentDiv);
@@ -99,7 +125,25 @@ async function creatTable() {
   }
 }
 
+// async function additionalAdd(name, point, value) {
+//   await db.collection('serve').doc(today).update({ [name]: point + Number(value) });
+//   // alert(`${name} + ${value}`);
+//   location.reload();
+// }
+
+function parameter() {
+  // 解析 URL 中的參數
+  const urlParams = new URLSearchParams(window.location.search);
+  const group = urlParams.get('group');
+
+  // 將參數附加到各個鏈接上
+  document.getElementById("signinLink").href = "signin.html?group=" + group;
+  document.getElementById("newFriendLink").href = "newfriend.html?group=" + group;
+  document.getElementById("displayLink").href = "display.html?group=" + group;
+}
 
 document.addEventListener("DOMContentLoaded", async function() {
+  parameter();
+
   creatTable();
 });

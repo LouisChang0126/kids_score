@@ -38,8 +38,9 @@ function createButton(studentNames) {
       // 點名按鈕功能
       studentButton.onclick = async () => {
         const snapshot = await db.collection('serve').doc(today).set({ [studentName]: 0 }, { merge: true });
-        alert(`${studentName} 簽到成功!`);
-        window.location.reload();
+        // alert(`${studentName} 簽到成功!`);
+        // window.location.reload();
+        studentButton.remove();
       };
 
       studentsDiv.appendChild(studentButton);
@@ -56,7 +57,20 @@ async function printDifference() {
   return difference;
 }
 
+function parameter() {
+  // 解析 URL 中的參數
+  const urlParams = new URLSearchParams(window.location.search);
+  const group = urlParams.get('group');
+
+  // 將參數附加到各個鏈接上
+  document.getElementById("scoreLink").href = "score.html?group=" + group;
+  document.getElementById("newFriendLink").href = "newfriend.html?group=" + group;
+  document.getElementById("displayLink").href = "display.html?group=" + group;
+}
+
 document.addEventListener("DOMContentLoaded", async function() {
+  parameter();
+  
   var difference = await printDifference();
   createButton(difference);
 });

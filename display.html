@@ -23,12 +23,6 @@
           <h2 class="subtitle is-3 mx-3">點數: 12</h2>
       </div>
     </div>
-    <div class="column">
-      <div class="box py-5">
-          <h2 class="title is-3 mx-3">多多</h2>
-          <h2 class="subtitle is-3 mx-3">點數: 12</h2>
-      </div>
-    </div>
     <!-- <div class="column">
       <div class="card">
         <div class="card-content">
@@ -41,14 +35,14 @@
   
   <nav class="breadcrumb is-large is-centered" aria-label="breadcrumbs">
     <ul>
-      <li><a href="index.html" aria-current="page">簽到</a></li>
-      <li><a href="score.html">加分</a></li>
-      <li><a href="newfriend.html">新朋友</a></li>
-      <li class="is-active"><a href="#">結算</a></li>
+      <li><a href="#" id="signinLink">簽到</a></li>
+      <li><a href="#" id="scoreLink">加分</a></li>
+      <li><a href="#" id="newFriendLink">新朋友</a></li>
+      <li class="is-active"><a href="#" id="displayLink">結算</a></li>
     </ul>
   </nav>
   <h1 class="title">今日學生分數</h1>
-  <div id="students-scores-display"></div>
+  <div id="scores-display"></div>
 </body>
 <script src="init_firestore.js" ></script>
 <script src="display.js" ></script>

@@ -8,33 +8,27 @@
   <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 </head>
+<!-- <style>
+  .breadcrumb {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+  }
+</style> -->
 <body>
   <nav class="breadcrumb is-large is-centered" aria-label="breadcrumbs">
     <ul>
-      <li><a href="#" id="signinLink">簽到</a></li>
-      <li class="is-active"><a href="#" id="scoreLink">加分</a></li>
+      <li class="is-active"><a href="#" id="signinLink">簽到</a></li>
+      <li><a href="#" id="scoreLink">加分</a></li>
       <li><a href="#" id="newFriendLink">新朋友</a></li>
       <li><a href="#" id="displayLink">結算</a></li>
     </ul>
   </nav>
-  <h1 class="title">加分</h1>
-  <table class="table">
-    <thead>
-      <tr>
-        <th class="title">寶貝</th>
-        <th class="title"><p>今天</p><p>點數</p></th>
-        <th class="title">+1</th>
-        <th class="title">+3</th>
-        <th class="title">0</th>
-        <th class="title">輸入</th>
-      </tr>
-    </thead>
-    <tbody id="panel">
-
-    </tbody>
-  </table>
-  <!--table-->
+  <h1 class="title">簽到</h1>
+  <div id="students"></div>
 </body>
 <script src="init_firestore.js" ></script>
-<script src="score.js" ></script>
+<script src="signin.js" ></script>
 </html>

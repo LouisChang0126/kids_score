@@ -8,27 +8,21 @@
   <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 </head>
-<!-- <style>
-  .breadcrumb {
-    position: fixed;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-  }
-</style> -->
 <body>
-  <nav class="breadcrumb is-large is-centered" aria-label="breadcrumbs">
-    <ul>
-      <li class="is-active"><a href="#" aria-current="page">簽到</a></li>
-      <li><a href="score.html">加分</a></li>
-      <li><a href="newfriend.html">新朋友</a></li>
-      <li><a href="display.html">結算</a></li>
-    </ul>
-  </nav>
-  <h1 class="title">簽到</h1>
-  <div id="students"></div>
+  <h1 class="title">松福兒崇點數系統</h1>
+  <button class="button is-large is-success mx-5" onclick="signin('小寶')">小寶</button>
+  <br>
+  <br>
+  <button class="button is-large is-info mx-5" onclick="signin('中寶')">中寶</button>
+  <br>
+  <br>
+  <button class="button is-large is-danger mx-5" onclick="signin('大寶')">大寶</button>
 </body>
 <script src="init_firestore.js" ></script>
-<script src="index.js" ></script>
+<script>
+  function signin(group) {
+    console.log(group);
+    window.location = "signin.html?group="+group;
+  }
+</script>
 </html>
