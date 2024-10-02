@@ -1,8 +1,11 @@
 const today = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+// 解析 URL 中的參數
+const urlParams = new URLSearchParams(window.location.search);
+const group = urlParams.get('group');
 
 async function load_signin_stuff() {
   var students = [];
-  const snapshot = await db.collection('serve').doc(today).get();
+  const snapshot = await db.collection('serve').doc(today+group).get();
   if (snapshot.exists) {
     students = Object(snapshot.data());  // 提取所有字段名稱（鍵）並存為數組
   }
@@ -39,7 +42,7 @@ async function creatTable() {
       addButton.className = 'button is-large is-success';
       addButton.textContent = '+1';
       addButton.onclick = async () => {
-        await db.collection('serve').doc(today).update({ [student]: point + 1 });
+        await db.collection('serve').doc(today+group).update({ [student]: point + 1 });
         // alert(`${student} 加 1 分`);
         // location.reload(); // 重新整理頁面
         point = point + 1;
@@ -54,7 +57,7 @@ async function creatTable() {
       add3Button.className = 'button is-large is-info';
       add3Button.textContent = '+3';
       add3Button.onclick = async () => {
-        await db.collection('serve').doc(today).update({ [student]: point + 3 });
+        await db.collection('serve').doc(today+group).update({ [student]: point + 3 });
         // alert(`${student} 加 3 分`);
         // location.reload();
         point = point + 3;
@@ -69,7 +72,7 @@ async function creatTable() {
       resetButton.className = 'button is-large is-danger';
       resetButton.textContent = '歸零';
       resetButton.onclick = async () => {
-        await db.collection('serve').doc(today).update({ [student]: 0 });
+        await db.collection('serve').doc(today+group).update({ [student]: 0 });
         // alert(`${student} 分數歸零`);
         // location.reload();
         point = 0;
@@ -97,10 +100,15 @@ async function creatTable() {
       inputBtn.className = 'button is-primary is-large';
       inputBtn.textContent = '送出';
       inputBtn.onclick = async () => {
-        await db.collection('serve').doc(today).update({ [student]: point +  Number(inputInp.value)});
-        point = point + Number(inputInp.value);
-        score.textContent = `+ ${point}`;
-        inputInp.value = "";
+        if(Number.isInteger(Number(inputInp.value))){
+          await db.collection('serve').doc(today+group).update({ [student]: point +  Number(inputInp.value)});
+          point = point + Number(inputInp.value);
+          score.textContent = `+ ${point}`;
+          inputInp.value = "";
+        }
+        else{
+          alert('請輸入整數');
+        }
       };
       
       // inputTd.innerHTML = `
@@ -126,16 +134,12 @@ async function creatTable() {
 }
 
 // async function additionalAdd(name, point, value) {
-//   await db.collection('serve').doc(today).update({ [name]: point + Number(value) });
+//   await db.collection('serve').doc(today+group).update({ [name]: point + Number(value) });
 //   // alert(`${name} + ${value}`);
 //   location.reload();
 // }
 
 function parameter() {
-  // 解析 URL 中的參數
-  const urlParams = new URLSearchParams(window.location.search);
-  const group = urlParams.get('group');
-
   // 將參數附加到各個鏈接上
   document.getElementById("signinLink").href = "signin.html?group=" + group;
   document.getElementById("newFriendLink").href = "newfriend.html?group=" + group;

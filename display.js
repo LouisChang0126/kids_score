@@ -1,26 +1,30 @@
 const today = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+// 解析 URL 中的參數
+const urlParams = new URLSearchParams(window.location.search);
+const group = urlParams.get('group');
 
 async function display() {
-  // 從 serve collection 抓取當天資料
-  doc = await db.collection('serve').doc(today).get()
+  doc = await db.collection('serve').doc(today+group).get()
   if (doc.exists) {
     const data = doc.data();
     const studentsScoresDiv = document.getElementById('scores-display');
 
-    Object.keys(data).forEach(student => {
-      const studentDiv = document.createElement('div');
-      studentDiv.className = 'box';
-
-      const studentName = document.createElement('h2');
-      studentName.className = 'title is-4';
-      studentName.textContent = student;
-      studentDiv.appendChild(studentName);
-
-      const score = document.createElement('p');
-      score.textContent = `分數: ${data[student]}`;
-      studentDiv.appendChild(score);
-
-      studentsScoresDiv.appendChild(studentDiv);
+    Object.entries(data).sort(([, valueA], [, valueB]) => valueB - valueA) // 按照值從大到小排序
+      .forEach(([student, point]) => {
+        const studentDiv = document.createElement('div');
+        studentDiv.className = 'box py-5';
+        const studentName = document.createElement('h2');
+        studentName.className = 'title is-3 mx-3';
+        studentName.textContent = student;
+        studentDiv.appendChild(studentName);
+  
+        const score = document.createElement('h2');
+        score.className = 'subtitle is-3 mx-3';
+        score.textContent = `點數: ➡️ ${point}`;
+        //<h2 class="subtitle is-3 mx-3">點數: 12 + 40 ➡️ <b>52</b></h2>
+        studentDiv.appendChild(score);
+  
+        studentsScoresDiv.appendChild(studentDiv);
     });
   }
   else {
@@ -29,10 +33,6 @@ async function display() {
 }
 
 function parameter() {
-  // 解析 URL 中的參數
-  const urlParams = new URLSearchParams(window.location.search);
-  const group = urlParams.get('group');
-
   // 將參數附加到各個鏈接上
   document.getElementById("signinLink").href = "signin.html?group=" + group;
   document.getElementById("scoreLink").href = "score.html?group=" + group;
