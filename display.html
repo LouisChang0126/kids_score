@@ -1,15 +1,20 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>點數展示頁面</title>
+  <title>松福兒崇點數系統</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
   <script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 </head>
 <body>
+  <div class="column ">
+    <div class="box py-5 mx-3">
+        <h2 class="title is-3 mx-3">多多</h2>
+        <h2 class="subtitle is-3 mx-3">點數: 12 + 40 ➡️ <b>52</b></h2>
+    </div>
+  </div>
   <!-- <div class="columns is-8 mx-3">
     <div class="column">
       <div class="box py-5">
@@ -33,7 +38,7 @@
       <li class="is-active"><a href="#" id="displayLink">結算</a></li>
     </ul>
   </nav>
-  <h1 class="title">今日學生分數</h1>
+  <h1 class="title">今日點數：已儲存</h1>
   <div id="scores-display"></div>
 </body>
 <script src="init_firestore.js" ></script>

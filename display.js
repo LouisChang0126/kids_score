@@ -12,14 +12,14 @@ async function display() {
     Object.entries(data).sort(([, valueA], [, valueB]) => valueB - valueA) // 按照值從大到小排序
       .forEach(([student, point]) => {
         const studentDiv = document.createElement('div');
-        studentDiv.className = 'box py-5';
+        studentDiv.className = 'box py-5 mx-6';
         const studentName = document.createElement('h2');
-        studentName.className = 'title is-3 mx-3';
+        studentName.className = 'title is-3 mx-6';
         studentName.textContent = student;
         studentDiv.appendChild(studentName);
   
         const score = document.createElement('h2');
-        score.className = 'subtitle is-3 mx-3';
+        score.className = 'subtitle is-3 mx-6';
         score.textContent = `點數: ➡️ ${point}`;
         //<h2 class="subtitle is-3 mx-3">點數: 12 + 40 ➡️ <b>52</b></h2>
         studentDiv.appendChild(score);
