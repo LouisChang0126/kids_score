@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
+    <title>松福兒崇點數系統</title>
+    <link rel="stylesheet" href="normal.css">
+    <style>
+		.container {
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			height: calc(100vh - 70px);
+			margin-top: 50px;
+			gap: 30px;
+		}
+	</style>
+</head>
+<body>
+    <div class="header">
+        <div>松福兒崇點數系統</div>
+        <ul>
+            <li><a href="#" id="signinLink">簽到</a></li>
+            <li><a href="#" id="scoreLink">加分</a></li>
+            <li><a href="#" id="newFriendLink">新朋友</a></li>
+            <li class="is-active"><a href="#" id="managerLink">管理員</a></li>
+        </ul>
+    </div>
+    <div class="container">
+        
+    </div>
+</body>
+<script src="init_firestore.js" ></script>
+<script>
+	const today = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+	// 解析 URL 中的參數
+	const urlParams = new URLSearchParams(window.location.search);
+	const group = urlParams.get('group');
+
+	function parameter() {
+		// 將參數附加到各個鏈接上
+		document.getElementById("signinLink").href = "signin.html?group=" + group;
+		document.getElementById("scoreLink").href = "score.html?group=" + group;
+		document.getElementById("newFriendLink").href = "newfriend.html?group=" + group;
+		document.getElementById("managerLink").href = "manager.html?group=" + group;
+	}
+
+	document.addEventListener("DOMContentLoaded", async function() {
+		if(group === "null"){
+			window.location.href = "index.html";
+		}
+		
+		parameter();
+	});
+
+</script>
+</html>

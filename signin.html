@@ -1,37 +1,137 @@
 <!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>松福兒崇點數系統</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-  <script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
-  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
+    <title>松福兒崇點數系統</title>
+    <link rel="stylesheet" href="normal.css">
 </head>
-<!-- <style>
-  .breadcrumb {
-    position: fixed;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-  }
-</style> -->
 <body>
-  <nav class="breadcrumb is-large is-centered" aria-label="breadcrumbs">
-    <ul>
-      <li class="is-active"><a href="#" id="signinLink">簽到</a></li>
-      <li><a href="#" id="scoreLink">加分</a></li>
-      <li><a href="#" id="newFriendLink">新朋友</a></li>
-      <li><a href="#" id="displayLink">結算</a></li>
-    </ul>
-  </nav>
-  <h1 class="title">簽到</h1>
-  <div id="students"></div>
-  <div id="group1"></div>
-  <div id="group2"></div>
-  <div id="group3"></div>
+    <div class="header">
+        <div>松福兒崇點數系統</div>
+        <ul>
+            <li class="is-active"><a href="#" id="signinLink">簽到</a></li>
+            <li><a href="#" id="scoreLink">加分</a></li>
+            <li><a href="#" id="newFriendLink">新朋友</a></li>
+            <li><a href="#" id="managerLink">管理員</a></li>
+        </ul>
+    </div>
+    <div class="content">
+        <div id="students-all-arrive"></div>
+        <div class="group" id="group-big"></div>
+        <div class="group" id="group-medium"></div>
+        <div class="group" id="group-small"></div>
+    </div>
+    <script src="init_firestore.js" ></script>
+    <script>
+        const today = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+        // 解析 URL 中的參數
+        const urlParams = new URLSearchParams(window.location.search);
+        const group = urlParams.get('group');
+
+        async function load_signin() {
+            var students = [];
+            const group_name = ['小寶','中寶','大寶'];
+            for(let group of group_name){
+                const snapshot = await db.collection('serve').doc(today+group).get();
+                if (snapshot.exists) {
+                students = students.concat(Object.keys(snapshot.data()));  // 提取所有字段名稱（鍵）並存為數組
+                }
+            }
+            return students;
+        }
+
+        async function load_all_students() {
+            let students = {};
+            // 从 kids collection 中抓取学生名单
+            const snapshot = await db.collection('kids').get();  // 使用 await 等待 Promise 完成
+            snapshot.forEach(doc => {
+                const studentName = doc.id;
+                students[studentName] = doc.data()['group'];
+            });
+            // console.log(students);
+            return students;
+        }
+
+        function createButton(studentNames) {
+            var studentsDiv = document.getElementById('students-all-arrive');
+            studentsDiv.innerHTML = '';  // 清空之前的按钮，以便重新创建
+            if(Object.keys(studentNames).length === 0){
+                const nobody = document.createElement('h1');
+                nobody.className = 'title';
+                nobody.textContent = "大家都到囉!!!";
+                studentsDiv.appendChild(nobody);
+            }
+            else{
+                Object.entries(studentNames).forEach(([name, group]) => {
+                const studentButton = document.createElement('button');
+                if(group == '大寶'){
+                    studentButton.className = 'button red';
+                    studentsDiv = document.getElementById('group-big');
+                }
+                else if(group == '中寶'){
+                    studentButton.className = 'button blue';
+                    studentsDiv = document.getElementById('group-medium');
+                }
+                else{
+                    studentButton.className = 'button green';
+                    studentsDiv = document.getElementById('group-small');
+                }
+                studentButton.textContent = name;
+
+                // 點名按鈕功能
+                studentButton.onclick = async () => {
+                    const JSON = {
+                        point: 0,
+                        ontime: false,
+                        seat: false,
+                        small_group: false,
+                        praise: false,
+                        addition: 0
+                    }
+                    const snapshot = await db.collection('serve').doc(today+group).set({ [name]: JSON }, { merge: true });
+                    // window.location.reload();
+                    studentButton.remove();
+                };
+
+                studentsDiv.appendChild(studentButton);
+                // studentsDiv.appendChild(document.createElement('br'));
+                });
+            }
+        }
+
+        async function getDifference() {
+            var allStudents = await load_all_students();  // 获取所有学生名单
+            var SigninStudents = await load_signin();  // 获取签到学生名单
+            // 计算差集
+            // 删除已签到学生
+            console.log(allStudents);
+            console.log(SigninStudents);
+            SigninStudents.forEach(student => {
+                delete allStudents[student];
+            });
+            console.log(allStudents);
+            return allStudents;
+        }
+
+        function parameter() {
+            // 將參數附加到各個鏈接上
+            document.getElementById("scoreLink").href = "score.html?group=" + group;
+            document.getElementById("newFriendLink").href = "newfriend.html?group=" + group;
+            document.getElementById("managerLink").href = "manager.html?group=" + group;
+        }
+
+        document.addEventListener("DOMContentLoaded", async function() {
+            if(group === "null"){
+                window.location.href = "index.html";
+            }
+            parameter();
+            
+            var difference = await getDifference();
+            createButton(difference);
+        });
+    </script>
 </body>
-<script src="init_firestore.js" ></script>
-<script src="signin.js" ></script>
 </html>

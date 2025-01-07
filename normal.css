@@ -1,0 +1,83 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+.header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background-color: #f4a261;
+    color: white;
+    height: 70px;
+    font-size: 40px;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
+    box-sizing: border-box;
+}
+.header ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    width: 50%;
+    height: 100%;
+}
+.header li {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+.header a {
+    color: white;
+    text-decoration: none;
+    font-size: 35px;
+    white-space: nowrap;
+    display: block;
+}
+.header .is-active {
+    background-color: #ff7d13;
+}
+.content {
+    margin-top: 70px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.button {
+    padding: 10px 20px;
+    font-size: 30px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.button.red {
+    background-color: #ff4a4a;
+}
+.button.blue {
+    background-color: #4299e0;
+}
+.button.green {
+    background-color: #48c78e;
+}
+.button.orange {
+    background-color: #f4a261;
+}
+.button.purple {
+    background-color: plum;
+}
+.button.brown {
+    background-color: burlywood;
+}
+.group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 30px;
+}

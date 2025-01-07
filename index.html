@@ -1,28 +1,76 @@
 <!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>松福兒崇點數系統</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-  <script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
-  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>松福兒崇點數系統</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background-color: #f4a261;
+            color: white;
+            padding: 15px 0;
+            font-size: 40px;
+            z-index: 1000;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: calc(100vh - 50px);
+            margin-top: 50px;
+            gap: 30px;
+        }
+        .button {
+            padding: 20px 40px;
+            font-size: 40px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .button:first-child {
+            background-color: #ff4a4a;
+        }
+        .button:nth-child(3) {
+            background-color: #4299e0;
+        }
+        .button:last-child {
+            background-color: #48c78e;
+        }
+        .button:hover {
+            filter: brightness(0.9);
+        }
+        .line {
+            width: 2px;
+            height: 80px;
+            background-color: #333;
+        }
+    </style>
 </head>
 <body>
-  <h1 class="title">松福兒崇點數系統</h1>
-  <button class="button is-large is-success mx-5" onclick="signin('小寶')">小寶</button>
-  <br>
-  <br>
-  <button class="button is-large is-info mx-5" onclick="signin('中寶')">中寶</button>
-  <br>
-  <br>
-  <button class="button is-large is-danger mx-5" onclick="signin('大寶')">大寶</button>
+    <div class="header">松福兒崇點數系統</div>
+    <div class="container">
+        <button class="button" onclick="signin('大寶')">大寶</button>
+        <div class="line"></div>
+        <button class="button" onclick="signin('中寶')">中寶</button>
+        <div class="line"></div>
+        <button class="button" onclick="signin('小寶')">小寶</button>
+    </div>
+    <script>
+        function signin(group) {
+            console.log(group);
+            window.location = "signin.html?group="+group;
+        }
+    </script>
 </body>
-<script src="init_firestore.js" ></script>
-<script>
-  function signin(group) {
-    console.log(group);
-    window.location = "signin.html?group="+group;
-  }
-</script>
 </html>

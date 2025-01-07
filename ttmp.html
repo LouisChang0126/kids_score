@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>卡片式 Radio 按鈕</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    /* 表單容器 */
+    form {
+      max-width: 400px;
+      margin: 20px auto;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      background-color: #f9f9f9;
+    }
+
+    /* 卡片容器 */
+    .card {
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      padding: 10px 20px;
+      margin: 10px 0;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    /* 當選中時的卡片樣式 */
+    input[type="radio"]:checked + .card {
+      border-color: #4CAF50;
+      background-color: #e8f5e9;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 隱藏默認 Radio */
+    input[type="radio"] {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <form>
+    <h3>請選擇組別</h3>
+
+    <!-- 組別選項 -->
+    <label>
+        <input type="radio" name="group" value="大寶" required>
+        <span class="custom-radio"></span> 大寶
+    </label>
+  
+    <label>
+        <input type="radio" name="group" value="中寶" required>
+        <span class="custom-radio"></span> 中寶
+    </label>
+  
+    <label>
+        <input type="radio" name="group" value="小寶" required>
+        <span class="custom-radio"></span> 小寶
+    </label>
+
+    <br><br>
+    <button type="submit">提交</button>
+  </form>
+</body>
+</html>

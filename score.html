@@ -1,40 +1,280 @@
 <!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>松福兒崇點數系統</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-  <script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
-  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
+    <title>松福兒崇點數系統</title>
+    <link rel="stylesheet" href="normal.css">
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #555555;
+            color: white;
+        }
+        .addition_input {
+            font-size: 20px;
+            width: 40px;
+        }
+        .seal {
+            width: 80px;
+            height: 80px;
+        }
+    </style>
 </head>
 <body>
-  <nav class="breadcrumb is-large is-centered" aria-label="breadcrumbs">
-    <ul>
-      <li><a href="#" id="signinLink">簽到</a></li>
-      <li class="is-active"><a href="#" id="scoreLink">加分</a></li>
-      <li><a href="#" id="newFriendLink">新朋友</a></li>
-      <li><a href="#" id="displayLink">結算</a></li>
-    </ul>
-  </nav>
-  <h1 class="title">加分</h1>
-  <table class="table">
-    <thead>
-      <tr>
-        <th class="title">寶貝</th>
-        <th class="title"><p>今天</p><p>點數</p></th>
-        <th class="title">+1</th>
-        <th class="title">+3</th>
-        <th class="title">0</th>
-        <th class="title">輸入</th>
-      </tr>
-    </thead>
-    <tbody id="panel">
-
-    </tbody>
-  </table>
-  <!--table-->
+    <div class="header">
+        <div>松福兒崇點數系統</div>
+        <ul>
+            <li><a href="#" id="signinLink">簽到</a></li>
+            <li class="is-active"><a href="#" id="scoreLink">加分</a></li>
+            <li><a href="#" id="newFriendLink">新朋友</a></li>
+            <li><a href="#" id="managerLink">管理員</a></li>
+        </ul>
+    </div>
+    <div class="content">
+        <table class="table">
+          <thead>
+            <tr>
+              <th class="title">寶貝</th>
+              <th class="title">累計點數</th>
+              <th class="title">今天點數</th>
+              <th class="title">準時</th>
+              <th class="title">專心敬拜</th>
+              <th class="title">搬椅子</th>
+              <th class="title">小組討論</th>
+              <th class="title">額外加點</th>
+            </tr>
+          </thead>
+          <tbody id="panel">
+      
+          </tbody>
+        </table>
+    </div>
 </body>
 <script src="init_firestore.js" ></script>
-<script src="score.js" ></script>
+
+<script>
+const today = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+// 解析 URL 中的參數
+const urlParams = new URLSearchParams(window.location.search);
+const group = urlParams.get('group');
+
+async function load_this_week() {
+  var students = [];
+  const snapshot = await db.collection('serve').doc(today+group).get();
+  if (snapshot.exists) {
+    students = Object(snapshot.data());  // 提取所有字段名稱（鍵）並存為數組
+  }
+  return students;
+}
+
+async function load_kids() {
+  var students = {};
+  const snapshot = await db.collection('kids').where('group', '==', group).get();
+  if (!snapshot.empty) {
+    snapshot.forEach(doc => {
+      students[doc.id] = doc.data(); // 提取每個文件的資料
+    });
+  }
+  return students;
+}
+
+async function creatTable() {
+    var signin_week = await load_this_week();
+    var signin_user = await load_kids();
+    const studentsScoresDiv = document.getElementById('panel');
+    
+    if (Object.keys(signin_week).length === 0) {
+        alert("今天尚未點名！");
+        window.location.href = "signin.html?group=" + group;
+    }
+    else {
+        // 按照键（学生名字）进行排序
+        const sortedEntries = Object.entries(signin_week).sort(([studentA], [studentB]) => studentA.localeCompare(studentB));
+        
+        sortedEntries.forEach(([student, user_data]) => {
+            let total_point = signin_user[student]['total_point'];
+
+            const studentDiv = document.createElement('tr');
+            studentDiv.className = 'tr';
+
+            const studentName = document.createElement('td');
+            studentName.textContent = student;
+            studentDiv.appendChild(studentName);
+
+            const total_score = document.createElement('td');
+            total_score.textContent = `+ ${total_point}`;
+            studentDiv.appendChild(total_score);
+
+            const score = document.createElement('td');
+            score.textContent = `+ ${user_data['point']}`;
+            studentDiv.appendChild(score);
+
+            // 準時+3按鈕
+            const ontime_td = document.createElement('td');
+            const ontime_seal = document.createElement('img');
+            ontime_seal.src = "ontime.png";
+            ontime_seal.className = "seal"
+            ontime_seal.hidden = !user_data['ontime'];
+            ontime_td.onclick = async () => {
+                if(ontime_seal.hidden){
+                    ontime_seal.hidden = false;
+                    user_data['point'] += 3;
+                    user_data['ontime'] = true;
+                    total_point += 3;
+                }
+                else{
+                    ontime_seal.hidden = true;
+                    user_data['point'] -= 3;
+                    user_data['ontime'] = false;
+                    total_point -= 3;
+                }
+                await db.collection('serve').doc(today+group).update({ [student]: user_data});
+                await db.collection('kids').doc(student).update({ ['total_point']: total_point});
+                total_score.textContent = `+ ${total_point}`;
+                score.textContent = `+ ${user_data['point']}`;
+            };
+            ontime_td.appendChild(ontime_seal);
+            studentDiv.appendChild(ontime_td);
+
+            // 專心敬拜+2按鈕
+            const praise_td = document.createElement('td');
+            const praise_seal = document.createElement('img');
+            praise_seal.src = "praise.png";
+            praise_seal.className = "seal"
+            praise_seal.hidden = !user_data['praise'];
+            praise_td.onclick = async () => {
+                if(praise_seal.hidden){
+                    praise_seal.hidden = false;
+                    user_data['point'] += 2;
+                    user_data['praise'] = true;
+                    total_point += 2;
+                }
+                else{
+                    praise_seal.hidden = true;
+                    user_data['point'] -= 2;
+                    user_data['praise'] = false;
+                    total_point -= 2;
+                }
+                await db.collection('serve').doc(today+group).update({ [student]: user_data});
+                await db.collection('kids').doc(student).update({ ['total_point']: total_point});
+                total_score.textContent = `+ ${total_point}`;
+                score.textContent = `+ ${user_data['point']}`;
+            };
+            praise_td.appendChild(praise_seal);
+            studentDiv.appendChild(praise_td);
+
+            // 搬椅子+1按鈕
+            const seat_td = document.createElement('td');
+            const seat_seal = document.createElement('img');
+            seat_seal.src = "seat.png";
+            seat_seal.className = "seal"
+            seat_seal.hidden = !user_data['seat'];
+            seat_td.onclick = async () => {
+                if(seat_seal.hidden){
+                    seat_seal.hidden = false;
+                    user_data['point'] += 1;
+                    user_data['seat'] = true;
+                    total_point += 1;
+                }
+                else{
+                    seat_seal.hidden = true;
+                    user_data['point'] -= 1;
+                    user_data['seat'] = false;
+                    total_point -= 1;
+                }
+                await db.collection('serve').doc(today+group).update({ [student]: user_data});
+                await db.collection('kids').doc(student).update({ ['total_point']: total_point});
+                total_score.textContent = `+ ${total_point}`;
+                score.textContent = `+ ${user_data['point']}`;
+            };
+            seat_td.appendChild(seat_seal);
+            studentDiv.appendChild(seat_td);
+
+            // 小組+1按鈕
+            const small_group_td = document.createElement('td');
+            const small_group_seal = document.createElement('img');
+            small_group_seal.src = "small_group.png";
+            small_group_seal.className = "seal"
+            small_group_seal.hidden = !user_data['small_group'];
+            small_group_td.onclick = async () => {
+                if(small_group_seal.hidden){
+                    small_group_seal.hidden = false;
+                    user_data['point'] += 1;
+                    user_data['small_group'] = true;
+                    total_point += 1;
+                }
+                else{
+                    small_group_seal.hidden = true;
+                    user_data['point'] -= 1;
+                    user_data['small_group'] = false;
+                    total_point -= 1;
+                }
+                await db.collection('serve').doc(today+group).update({ [student]: user_data});
+                await db.collection('kids').doc(student).update({ ['total_point']: total_point});
+                total_score.textContent = `+ ${total_point}`;
+                score.textContent = `+ ${user_data['point']}`;
+            };
+            small_group_td.appendChild(small_group_seal);
+            studentDiv.appendChild(small_group_td);
+
+            // 額外加分
+            const addition_td = document.createElement('td');
+            const addition_input = document.createElement('input');
+            addition_input.type = 'number';
+            addition_input.className = 'addition_input';
+            addition_input.min = 0;
+            addition_input.max = 100;
+            addition_input.step = 1;
+            addition_input.value = user_data['addition'];
+
+            let pre_additional = user_data['addition'];
+            addition_input.addEventListener('change', async () => {
+                total_point += (addition_input.value - pre_additional);
+                user_data['point'] += (addition_input.value - pre_additional);
+                pre_additional = addition_input.value;
+                user_data['addition'] = addition_input.value;
+
+                await db.collection('serve').doc(today+group).update({ [student]: user_data});
+                await db.collection('kids').doc(student).update({ ['total_point']: total_point});
+                total_score.textContent = `+ ${total_point}`;
+                score.textContent = `+ ${user_data['point']}`;
+                
+            });
+            addition_td.appendChild(addition_input);
+            studentDiv.appendChild(addition_td);
+
+            studentsScoresDiv.appendChild(studentDiv);
+        });
+    }
+}
+
+function parameter() {
+  // 將參數附加到各個鏈接上
+  document.getElementById("signinLink").href = "signin.html?group=" + group;
+  document.getElementById("newFriendLink").href = "newfriend.html?group=" + group;
+  document.getElementById("managerLink").href = "manager.html?group=" + group;
+}
+
+document.addEventListener("DOMContentLoaded", async function() {
+    if(group === "null"){
+        window.location.href = "index.html";
+    }
+    parameter();
+
+    creatTable();
+});
+</script>
 </html>
