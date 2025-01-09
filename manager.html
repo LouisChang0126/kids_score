@@ -25,6 +25,10 @@
 			/* height: 50vh; */
 			font-size: 200%;
 		}
+		.line {
+			margin: 10px;
+			margin-left: 50px;
+		}
 	</style>
 </head>
 <body>
@@ -133,11 +137,13 @@
 		for(let i=0; i<Math.max(...Object.values(kids)); i++){
 			// 遍歷物件並篩選符合條件的鍵
 			let arr = Object.entries(kids).filter(([key, value]) => value === (i+1)).map(([key, value]) => key);
-			care_system.innerHTML += `<p>${chinese_number[i]}週沒出現：${arr.join(" ")}</p>`;
+			care_system.innerHTML += `<p class='line'>${chinese_number[i]}週沒出現：${arr.join(" ")}</p>`;
 		}
 		// 最大週次
-		let arr = Object.entries(kids).filter(([key, value]) => value === -1).map(([key, value]) => key);
-		care_system.innerHTML += `<p>${chinese_number[breakpoint-1]}週以上沒出現：${arr.join(" ")}</p>`;
+		if(breakpoint>0){
+			let arr = Object.entries(kids).filter(([key, value]) => value === -1).map(([key, value]) => key);
+			care_system.innerHTML += `<p class='line'>${chinese_number[breakpoint-1]}週以上沒出現：${arr.join(" ")}</p>`;
+		}
 	}
 </script>
 </html>
