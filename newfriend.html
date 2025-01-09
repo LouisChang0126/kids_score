@@ -15,7 +15,6 @@
 			margin-top: 70px;
 			gap: 30px;
 		}
-		/* 表單容器 */
 		form {
 			margin: 20px auto;
 			padding: 20px;
@@ -26,20 +25,16 @@
 			/* height: 70vh; */
 			font-size: 200%;
 		}
-
-		/* 標籤樣式 */
 		label {
 			display: inline-flex;
 			align-items: center;
 			cursor: pointer;
 			margin: 10px;
 		}
-
 		/* 隱藏默認的 Radio */
 		input[type="radio"] {
 			display: none;
 		}
-
 		/* 自訂 Radio 外觀 */
 		.custom-radio {
 			width: 20px;
@@ -50,12 +45,10 @@
 			display: inline-block;
 			position: relative;
 		}
-
 		/* Radio 被選中時的樣式 */
 		input[type="radio"]:checked + .custom-radio {
 			background-color: #4CAF50;
 		}
-
 		/* 選中的圓點 */
 		input[type="radio"]:checked + .custom-radio::after {
 			content: "";

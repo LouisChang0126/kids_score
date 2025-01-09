@@ -16,20 +16,24 @@
             border: 1px solid #ccc;
         }
         th, td {
-            padding: 10px;
-            text-align: left;
+            padding: 5px;
+            text-align: center;
         }
         th {
             background-color: #555555;
             color: white;
+        }
+        .seal-block {
+            width: 100px;
+            height: 100px;
         }
         .addition_input {
             font-size: 20px;
             width: 40px;
         }
         .seal {
-            width: 80px;
-            height: 80px;
+            width: 90px;
+            height: 90px;
         }
     </style>
 </head>
@@ -125,6 +129,7 @@ async function creatTable() {
             // 準時+3按鈕
             const ontime_td = document.createElement('td');
             const ontime_seal = document.createElement('img');
+            ontime_td.className = 'seal-block';
             ontime_seal.src = "ontime.png";
             ontime_seal.className = "seal"
             ontime_seal.hidden = !user_data['ontime'];
@@ -152,6 +157,7 @@ async function creatTable() {
             // 專心敬拜+2按鈕
             const praise_td = document.createElement('td');
             const praise_seal = document.createElement('img');
+            praise_td.className = 'seal-block';
             praise_seal.src = "praise.png";
             praise_seal.className = "seal"
             praise_seal.hidden = !user_data['praise'];
@@ -179,6 +185,7 @@ async function creatTable() {
             // 搬椅子+1按鈕
             const seat_td = document.createElement('td');
             const seat_seal = document.createElement('img');
+            seat_td.className = 'seal-block';
             seat_seal.src = "seat.png";
             seat_seal.className = "seal"
             seat_seal.hidden = !user_data['seat'];
@@ -206,6 +213,7 @@ async function creatTable() {
             // 小組+1按鈕
             const small_group_td = document.createElement('td');
             const small_group_seal = document.createElement('img');
+            small_group_td.className = 'seal-block';
             small_group_seal.src = "small_group.png";
             small_group_seal.className = "seal"
             small_group_seal.hidden = !user_data['small_group'];
