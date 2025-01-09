@@ -79,23 +79,23 @@ const urlParams = new URLSearchParams(window.location.search);
 const group = urlParams.get('group');
 
 async function load_this_week() {
-  var students = [];
-  const snapshot = await db.collection('serve').doc(today+group).get();
-  if (snapshot.exists) {
-    students = Object(snapshot.data());  // 提取所有字段名稱（鍵）並存為數組
-  }
-  return students;
+    var students = [];
+    const snapshot = await db.collection(group).doc(today).get();
+    if (snapshot.exists) {
+        students = Object(snapshot.data());  // 提取所有字段名稱（鍵）並存為數組
+    }
+    return students;
 }
 
 async function load_kids() {
-  var students = {};
-  const snapshot = await db.collection('kids').where('group', '==', group).get();
-  if (!snapshot.empty) {
-    snapshot.forEach(doc => {
-      students[doc.id] = doc.data(); // 提取每個文件的資料
-    });
-  }
-  return students;
+    var students = {};
+    const snapshot = await db.collection('kids').where('group', '==', group).get();
+    if (!snapshot.empty) {
+        snapshot.forEach(doc => {
+        students[doc.id] = doc.data(); // 提取每個文件的資料
+        });
+    }
+    return students;
 }
 
 async function creatTable() {
@@ -152,7 +152,7 @@ async function creatTable() {
                     user_data['ontime'] = false;
                     total_point -= 3;
                 }
-                await db.collection('serve').doc(today+group).update({ [student]: user_data});
+                await db.collection(group).doc(today).update({ [student]: user_data});
                 await db.collection('kids').doc(student).update({ ['total_point']: total_point});
                 total_score.textContent = `+ ${total_point}`;
                 score.textContent = `+ ${user_data['point']}`;
@@ -180,7 +180,7 @@ async function creatTable() {
                     user_data['praise'] = false;
                     total_point -= 2;
                 }
-                await db.collection('serve').doc(today+group).update({ [student]: user_data});
+                await db.collection(group).doc(today).update({ [student]: user_data});
                 await db.collection('kids').doc(student).update({ ['total_point']: total_point});
                 total_score.textContent = `+ ${total_point}`;
                 score.textContent = `+ ${user_data['point']}`;
@@ -208,7 +208,7 @@ async function creatTable() {
                     user_data['seat'] = false;
                     total_point -= 1;
                 }
-                await db.collection('serve').doc(today+group).update({ [student]: user_data});
+                await db.collection(group).doc(today).update({ [student]: user_data});
                 await db.collection('kids').doc(student).update({ ['total_point']: total_point});
                 total_score.textContent = `+ ${total_point}`;
                 score.textContent = `+ ${user_data['point']}`;
@@ -236,7 +236,7 @@ async function creatTable() {
                     user_data['small_group'] = false;
                     total_point -= 1;
                 }
-                await db.collection('serve').doc(today+group).update({ [student]: user_data});
+                await db.collection(group).doc(today).update({ [student]: user_data});
                 await db.collection('kids').doc(student).update({ ['total_point']: total_point});
                 total_score.textContent = `+ ${total_point}`;
                 score.textContent = `+ ${user_data['point']}`;
@@ -261,7 +261,7 @@ async function creatTable() {
                 pre_additional = addition_input.value;
                 user_data['addition'] = addition_input.value;
 
-                await db.collection('serve').doc(today+group).update({ [student]: user_data});
+                await db.collection(group).doc(today).update({ [student]: user_data});
                 await db.collection('kids').doc(student).update({ ['total_point']: total_point});
                 total_score.textContent = `+ ${total_point}`;
                 score.textContent = `+ ${user_data['point']}`;

@@ -13,7 +13,7 @@
 			flex-direction: column;
 			justify-content: center;
 			align-items: center;
-			height: calc(100vh - 70px);
+			/* height: calc(100vh - 70px); */
 			margin-top: 70px;
 			gap: 20px;
 		}
@@ -22,7 +22,7 @@
 			border-radius: 10px;
 			background-color: #f9f9f9;
 			width: 80vw;
-			height: 50vh;
+			/* height: 50vh; */
 			font-size: 200%;
 		}
 	</style>
@@ -38,6 +38,7 @@
         </ul>
     </div>
     <div class="container">
+		<br>
 		<div>
 			<button id="big-btn" class="button red"   onclick="change_login_group('大寶')">切換成大寶</button>
 			<button id="mid-btn" class="button blue"  onclick="change_login_group('中寶')">切換成中寶</button>
@@ -49,7 +50,6 @@
 		</div>
 		<div id="care_system">
 			<button class="button orange">關懷系統</button>
-			<p>你好</p>
 		</div>
     </div>
 </body>
@@ -95,19 +95,49 @@
 		window.location.href="upgrade.html?group=" + group;
 	}
 
+	function get_sunday_format(week_before) {
+		const today = new Date();
+		const dayOfWeek = today.getDay(); // 取得今天是周幾 (0: 周日, 1: 周一, ...)
+		const lastSunday = new Date(today); // 複製今天的日期
+		lastSunday.setDate(today.getDate()- dayOfWeek - 7*week_before); // 設定為上周日的日期
+		const formattedDate = lastSunday.toISOString().slice(2, 10).replace(/-/g, '');// 格式化日期為 YYMMDD
+		return formattedDate;
+	}
+	async function load_kids() {
+		var students = {};
+		const snapshot = await db.collection('kids').where('group', '==', group).get();
+		if (!snapshot.empty) {
+			snapshot.forEach(doc => {
+				students[doc.id] = -1;
+			});
+		}
+		return students;
+	}
 	async function load_care(){
-		// const docSnap = await db.collection('serve')
-		// .where('name', '>=', '中寶') // 開始範圍
-		// .where('name', '<=', '中寶\uffff') // 結束範圍
-		// .get()
-		// .then((querySnapshot) => {
-		// 	querySnapshot.forEach((doc) => {
-		// 		console.log(doc.id, " => ", doc.data());
-		// 	});
-		// })
-		// .catch((error) => {
-		// 	console.error("Error fetching documents: ", error);
-		// });
+		var kids = await load_kids();
+		const care_system = document.getElementById("care_system");
+		const chinese_number = ['一', '二', '三', '四', '五', '六', '七', '八'];
+		let breakpoint = 8;
+		for(let i=0; i<8; i++){
+			const snapshot = await db.collection(group).doc(get_sunday_format(i)).get();
+			if (snapshot.exists) {
+				Object.keys(snapshot.data()).forEach(key => {
+					if(kids[key] === -1) kids[key] = i;
+				});
+			}
+			else{
+				breakpoint = i;
+				break;
+			}
+		}
+		for(let i=0; i<Math.max(...Object.values(kids)); i++){
+			// 遍歷物件並篩選符合條件的鍵
+			let arr = Object.entries(kids).filter(([key, value]) => value === (i+1)).map(([key, value]) => key);
+			care_system.innerHTML += `<p>${chinese_number[i]}週沒出現：${arr.join(" ")}</p>`;
+		}
+		// 最大週次
+		let arr = Object.entries(kids).filter(([key, value]) => value === -1).map(([key, value]) => key);
+		care_system.innerHTML += `<p>${chinese_number[breakpoint-1]}週以上沒出現：${arr.join(" ")}</p>`;
 	}
 </script>
 </html>

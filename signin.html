@@ -26,7 +26,12 @@
     </div>
     <script src="init_firestore.js" ></script>
     <script>
+        // const Today = new Date();
+        // const yesterday = new Date(Today);
+        // yesterday.setDate(Today.getDate() - 25);
         const today = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+        // const today = yesterday.toISOString().slice(2, 10).replace(/-/g, '');
+
         // 解析 URL 中的參數
         const urlParams = new URLSearchParams(window.location.search);
         const group = urlParams.get('group');
@@ -35,7 +40,7 @@
             var students = [];
             const group_name = ['小寶','中寶','大寶'];
             for(let group of group_name){
-                const snapshot = await db.collection('serve').doc(today+group).get();
+                const snapshot = await db.collection(group).doc(today).get();
                 if (snapshot.exists) {
                 students = students.concat(Object.keys(snapshot.data()));  // 提取所有字段名稱（鍵）並存為數組
                 }
@@ -91,7 +96,7 @@
                         praise: false,
                         addition: 0
                     }
-                    const snapshot = await db.collection('serve').doc(today+group).set({ [name]: JSON }, { merge: true });
+                    const snapshot = await db.collection(group).doc(today).set({ [name]: JSON }, { merge: true });
                     // window.location.reload();
                     studentButton.remove();
                 };
