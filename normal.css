@@ -18,6 +18,9 @@ body {
     z-index: 1000;
     box-sizing: border-box;
 }
+#sys-title {
+    padding-left: 20px;
+}
 .header ul {
     list-style: none;
     margin: 0;
