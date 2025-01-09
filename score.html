@@ -24,16 +24,19 @@
             color: white;
         }
         .seal-block {
-            width: 100px;
-            height: 100px;
+            width: 9vw;
+            height: 9vw;
         }
         .addition_input {
-            font-size: 20px;
-            width: 40px;
+            font-size: 200%;
+            width: 6vw;
         }
         .seal {
-            width: 90px;
-            height: 90px;
+            width: calc(9vw - 10px);
+            height: calc(9vw - 10px);
+        }
+        .score_num {
+            font-size: 200%;
         }
     </style>
 </head>
@@ -116,14 +119,17 @@ async function creatTable() {
 
             const studentName = document.createElement('td');
             studentName.textContent = student;
+            studentName.className = 'score_num';
             studentDiv.appendChild(studentName);
 
             const total_score = document.createElement('td');
             total_score.textContent = `+ ${total_point}`;
+            total_score.className = 'score_num';
             studentDiv.appendChild(total_score);
 
             const score = document.createElement('td');
             score.textContent = `+ ${user_data['point']}`;
+            score.className = 'score_num';
             studentDiv.appendChild(score);
 
             // 準時+3按鈕
