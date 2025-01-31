@@ -8,15 +8,29 @@
     <title>松福兒崇點數系統</title>
     <link rel="stylesheet" href="normal.css">
     <style>
-		.container {
-			display: flex;
-			flex-direction: column;
-			justify-content: center;
-			align-items: center;
-			height: calc(100vh - 70px);
-			margin-top: 50px;
-			gap: 30px;
-		}
+		table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+        th, td {
+            padding: 5px;
+            text-align: center;
+        }
+        th {
+            background-color: #555555;
+            color: white;
+        }
+        .name {
+            font-size: 200%;
+        }
+        .minus_input {
+            font-size: 200%;
+            width: 6vw;
+			margin-right: 2%;
+        }
 	</style>
 </head>
 <body>
@@ -29,8 +43,19 @@
             <li class="is-active"><a href="#" id="managerLink">管理員</a></li>
         </ul>
     </div>
-    <div class="container">
-        <p>not implemented!</p>
+    <div class="content">
+        <table class="table">
+          <thead>
+            <tr>
+              <th class="title">寶貝</th>
+              <th class="title">組別</th>
+              <th class="title">點數</th>
+              <th class="title">換點數</th>
+            </tr>
+          </thead>
+          <tbody id="panel">
+          </tbody>
+        </table>
     </div>
 </body>
 <script src="init_firestore.js" ></script>
@@ -39,6 +64,81 @@
 	// 解析 URL 中的參數
 	const urlParams = new URLSearchParams(window.location.search);
 	const group = urlParams.get('group');
+
+	async function load_kids(group_) {
+        var students = {};
+        const snapshot = await db.collection('kids').where('group', '==', group_).get();
+        if (!snapshot.empty) {
+            snapshot.forEach(doc => {
+                students[doc.id] = doc.data();
+            });
+        }
+        return students;
+    }
+
+    async function creatTable() {
+        var small_group = await load_kids('小寶');
+        var mid_group = await load_kids('中寶');
+        var big_group = await load_kids('大寶');
+        const tableBody = document.getElementById('panel');
+
+        function appendRows(groupData) {
+            Object.entries(groupData).forEach(([student, user_data]) => {
+                const studentDiv = document.createElement('tr');
+                studentDiv.className = 'tr';
+
+                const studentName = document.createElement('td');
+                studentName.textContent = student;
+                studentName.className = 'name';
+                studentDiv.appendChild(studentName);
+
+                const studentGroup = document.createElement('td');
+                studentGroup.textContent = user_data.group;
+                studentGroup.className = 'name';
+                studentDiv.appendChild(studentGroup);
+
+                const studentPoint = document.createElement('td');
+                studentPoint.textContent = user_data['total_point'];
+                studentPoint.className = 'name';
+                studentDiv.appendChild(studentPoint);
+
+                // 換點數
+                const minus_td = document.createElement('td');
+                const minus_input = document.createElement('input');
+				minus_input.type = 'number';
+				minus_input.className = 'minus_input';
+				minus_input.min = 1;
+				minus_input.max = 500;
+				minus_input.step = 1;
+				// minus_input.value = user_data['addition'];
+
+                const minus_btn = document.createElement('button');
+                minus_btn.className = 'button blue';
+                minus_btn.innerText = `換點數`;
+                minus_btn.onclick = async () => {
+					if(minus_input.value != ''){
+						if(Number(user_data.total_point) < Number(minus_input.value)){
+							alert('點數不足');
+						}
+						else if (window.confirm(`確定要為"${student}"扣掉"${minus_input.value}點"換點數嗎?`)) {
+							user_data['total_point'] -= minus_input.value;
+							await db.collection('kids').doc(student).update({ ['total_point']: user_data['total_point'] });
+							studentPoint.textContent = user_data['total_point'];
+						}
+					}
+                };
+                minus_td.appendChild(minus_input);
+                minus_td.appendChild(minus_btn);
+                studentDiv.appendChild(minus_td);                
+
+                tableBody.appendChild(studentDiv);
+            });
+        }
+
+        appendRows(small_group);
+        appendRows(mid_group);
+        appendRows(big_group);
+    }
 
 	function parameter() {
 		// 將參數附加到各個鏈接上
@@ -52,8 +152,8 @@
 		if(group === "null"){
 			window.location.href = "index.html";
 		}
-		
 		parameter();
+		creatTable();
 	});
 
 </script>

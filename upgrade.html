@@ -118,9 +118,6 @@
                 }
                 studentDiv.appendChild(downgrade_td);
                 
-
-                tableBody.appendChild(studentDiv);
-
                 // 隱藏按鈕
                 const hide_td = document.createElement('td');
                 const hide_btn = document.createElement('button');
@@ -134,6 +131,8 @@
                 };
                 hide_td.appendChild(hide_btn);
                 studentDiv.appendChild(hide_td);
+
+                tableBody.appendChild(studentDiv);
             });
         }
 
