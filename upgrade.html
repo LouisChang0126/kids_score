@@ -8,16 +8,25 @@
     <title>松福兒崇點數系統</title>
     <link rel="stylesheet" href="normal.css">
     <style>
-		.container {
-			display: flex;
-			flex-direction: column;
-			justify-content: center;
-			align-items: center;
-			height: calc(100vh - 70px);
-			margin-top: 50px;
-			gap: 30px;
-		}
-	</style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+        th, td {
+            padding: 5px;
+            text-align: center;
+        }
+        th {
+            background-color: #555555;
+            color: white;
+        }
+        .name {
+            font-size: 200%;
+        }
+    </style>
 </head>
 <body>
     <div class="header">
@@ -29,32 +38,123 @@
             <li class="is-active"><a href="#" id="managerLink">管理員</a></li>
         </ul>
     </div>
-    <div class="container">
-        <p>not implemented!</p>
+    <div class="content">
+        <table class="table">
+          <thead>
+            <tr>
+              <th class="title">寶貝</th>
+              <th class="title">組別</th>
+              <th class="title">升級</th>
+              <th class="title">降級</th>
+              <th class="title">隱藏</th>
+            </tr>
+          </thead>
+          <tbody id="panel">
+          </tbody>
+        </table>
     </div>
 </body>
 <script src="init_firestore.js" ></script>
 <script>
-	const today = new Date().toISOString().slice(2, 10).replace(/-/g, '');
-	// 解析 URL 中的參數
-	const urlParams = new URLSearchParams(window.location.search);
-	const group = urlParams.get('group');
+    const today = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+    const urlParams = new URLSearchParams(window.location.search);
+    const group = urlParams.get('group');
 
-	function parameter() {
-		// 將參數附加到各個鏈接上
-		document.getElementById("signinLink").href = "signin.html?group=" + group;
-		document.getElementById("scoreLink").href = "score.html?group=" + group;
-		document.getElementById("newFriendLink").href = "newfriend.html?group=" + group;
-		document.getElementById("managerLink").href = "manager.html?group=" + group;
-	}
+    async function load_kids(group_) {
+        var students = {};
+        const snapshot = await db.collection('kids').where('group', '==', group_).get();
+        if (!snapshot.empty) {
+            snapshot.forEach(doc => {
+                students[doc.id] = doc.data();
+            });
+        }
+        return students;
+    }
 
-	document.addEventListener("DOMContentLoaded", async function() {
-		if(group === "null"){
-			window.location.href = "index.html";
-		}
-		
-		parameter();
-	});
+    async function creatTable() {
+        var small_group = await load_kids('小寶');
+        var mid_group = await load_kids('中寶');
+        var big_group = await load_kids('大寶');
+        const tableBody = document.getElementById('panel');
 
+        function appendRows(groupData, nextGroup, preGroup) {
+            Object.entries(groupData).forEach(([student, user_data]) => {
+                const studentDiv = document.createElement('tr');
+                studentDiv.className = 'tr';
+
+                const studentName = document.createElement('td');
+                studentName.textContent = student;
+                studentName.className = 'name';
+                studentDiv.appendChild(studentName);
+
+                const studentGroup = document.createElement('td');
+                studentGroup.textContent = user_data.group;
+                studentGroup.className = 'name';
+                studentDiv.appendChild(studentGroup);
+
+                // 升級按鈕
+                const upgrade_td = document.createElement('td');
+                const upgrade_btn = document.createElement('button');
+                upgrade_btn.className = 'button blue';
+                upgrade_btn.innerText = `升級到${nextGroup}`;
+                upgrade_btn.onclick = async () => {
+                    await db.collection('kids').doc(student).update({ ['group']: nextGroup });
+                    window.location.reload();
+                };
+                upgrade_td.appendChild(upgrade_btn);
+                studentDiv.appendChild(upgrade_td);
+
+                // 降級按鈕
+                const downgrade_td = document.createElement('td');
+                if(preGroup){
+                    const downgrade_btn = document.createElement('button');
+                    downgrade_btn.className = 'button green';
+                    downgrade_btn.innerText = `降級到${preGroup}`;
+                    downgrade_btn.onclick = async () => {
+                        await db.collection('kids').doc(student).update({ ['group']: preGroup });
+                        window.location.reload();
+                    };
+                    downgrade_td.appendChild(downgrade_btn);
+                }
+                studentDiv.appendChild(downgrade_td);
+                
+
+                tableBody.appendChild(studentDiv);
+
+                // 隱藏按鈕
+                const hide_td = document.createElement('td');
+                const hide_btn = document.createElement('button');
+                hide_btn.className = 'button red';
+                hide_btn.innerText = '✖';
+                hide_btn.onclick = async () => {
+                    if (window.confirm(`隱藏會使寶貝永遠不再顯示\n確定要將"${student}"隱藏嗎？(只有管理員可以復原)`)) {
+                        await db.collection('kids').doc(student).update({ ['group']: '隱藏' });
+                        window.location.reload();
+                    }
+                };
+                hide_td.appendChild(hide_btn);
+                studentDiv.appendChild(hide_td);
+            });
+        }
+
+        appendRows(small_group, '中寶', '');
+        appendRows(mid_group, '大寶', '小寶');
+        appendRows(big_group, '新世代', '中寶');
+    }
+
+    function parameter() {
+        document.getElementById("signinLink").href = "signin.html?group=" + group;
+        document.getElementById("scoreLink").href = "score.html?group=" + group;
+        document.getElementById("newFriendLink").href = "newfriend.html?group=" + group;
+        document.getElementById("managerLink").href = "manager.html?group=" + group;
+    }
+
+    document.addEventListener("DOMContentLoaded", async function() {
+        if(group === "null"){
+            window.location.href = "index.html";
+        }
+        parameter();
+        creatTable();
+    });
 </script>
 </html>
