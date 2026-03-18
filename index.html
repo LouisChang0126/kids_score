@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>松福兒崇點數系統</title>
+    <title>北區會堂兒崇點數系統</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -11,6 +12,7 @@
             padding: 0;
             text-align: center;
         }
+
         .header {
             position: fixed;
             top: 0;
@@ -21,6 +23,7 @@
             font-size: 40px;
             z-index: 1000;
         }
+
         .container {
             display: flex;
             justify-content: center;
@@ -29,6 +32,7 @@
             margin-top: 50px;
             gap: 30px;
         }
+
         .button {
             padding: 20px 40px;
             font-size: 40px;
@@ -38,18 +42,23 @@
             cursor: pointer;
             transition: background-color 0.3s;
         }
+
         .button:first-child {
             background-color: #ff4a4a;
         }
+
         .button:nth-child(3) {
             background-color: #4299e0;
         }
+
         .button:last-child {
             background-color: #48c78e;
         }
+
         .button:hover {
             filter: brightness(0.9);
         }
+
         .line {
             width: 2px;
             height: 80px;
@@ -57,8 +66,9 @@
         }
     </style>
 </head>
+
 <body>
-    <div class="header">松福兒崇點數系統</div>
+    <div class="header">北區會堂兒崇點數系統</div>
     <div class="container">
         <button class="button" onclick="signin('大寶')">大寶</button>
         <div class="line"></div>
@@ -69,8 +79,9 @@
     <script>
         function signin(group) {
             console.log(group);
-            window.location = "signin.html?group="+group;
+            window.location = "signin.html?group=" + group;
         }
     </script>
 </body>
+
 </html>

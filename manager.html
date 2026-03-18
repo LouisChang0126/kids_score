@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
-    <title>松福兒崇點數系統</title>
-    <link rel="stylesheet" href="normal.css">
-    <style>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
+	<title>北區會堂兒崇點數系統</title>
+	<link rel="stylesheet" href="normal.css">
+	<style>
 		.container {
 			display: flex;
 			flex-direction: column;
@@ -17,6 +18,7 @@
 			margin-top: 70px;
 			gap: 20px;
 		}
+
 		#care_system {
 			border: 1px solid #ddd;
 			border-radius: 10px;
@@ -25,27 +27,29 @@
 			/* height: 50vh; */
 			font-size: 200%;
 		}
+
 		.line {
 			margin: 10px;
 			margin-left: 50px;
 		}
 	</style>
 </head>
+
 <body>
-    <div class="header">
-        <div id="sys-title">松福兒崇點數系統</div>
-        <ul>
-            <li><a href="#" id="signinLink">簽到</a></li>
-            <li><a href="#" id="scoreLink">加分</a></li>
-            <li><a href="#" id="newFriendLink">新朋友</a></li>
-            <li class="is-active"><a href="#" id="managerLink">管理員</a></li>
-        </ul>
-    </div>
-    <div class="container">
+	<div class="header">
+		<div id="sys-title">北區會堂兒崇點數系統</div>
+		<ul>
+			<li><a href="#" id="signinLink">簽到</a></li>
+			<li><a href="#" id="scoreLink">加分</a></li>
+			<li><a href="#" id="newFriendLink">新朋友</a></li>
+			<li class="is-active"><a href="#" id="managerLink">管理員</a></li>
+		</ul>
+	</div>
+	<div class="container">
 		<br>
 		<div>
-			<button id="big-btn" class="button red"   onclick="change_login_group('大寶')">切換成大寶</button>
-			<button id="mid-btn" class="button blue"  onclick="change_login_group('中寶')">切換成中寶</button>
+			<button id="big-btn" class="button red" onclick="change_login_group('大寶')">切換成大寶</button>
+			<button id="mid-btn" class="button blue" onclick="change_login_group('中寶')">切換成中寶</button>
 			<button id="sml-btn" class="button green" onclick="change_login_group('小寶')">切換成小寶</button>
 		</div>
 		<div>
@@ -55,9 +59,9 @@
 		<div id="care_system">
 			<button class="button orange">關懷系統</button>
 		</div>
-    </div>
+	</div>
 </body>
-<script src="init_firestore.js" ></script>
+<script src="init_firestore.js"></script>
 <script>
 	const today = new Date().toISOString().slice(2, 10).replace(/-/g, '');
 	// 解析 URL 中的參數
@@ -71,20 +75,20 @@
 		document.getElementById("newFriendLink").href = "newfriend.html?group=" + group;
 	}
 
-	document.addEventListener("DOMContentLoaded", async function() {
-		if(group === "null"){
+	document.addEventListener("DOMContentLoaded", async function () {
+		if (group === "null") {
 			window.location.href = "index.html";
 		}
-		else if(group === "大寶"){
+		else if (group === "大寶") {
 			document.getElementById("big-btn").hidden = true;
 		}
-		else if(group === "中寶"){
+		else if (group === "中寶") {
 			document.getElementById("mid-btn").hidden = true;
 		}
-		else{
+		else {
 			document.getElementById("sml-btn").hidden = true;
 		}
-		
+
 		parameter();
 		load_care();
 	});
@@ -92,18 +96,18 @@
 	function change_login_group(new_group) {
 		window.location.href = "manager.html?group=" + new_group;
 	}
-	function go_to_shop(){
-		window.location.href="shop.html?group=" + group;
+	function go_to_shop() {
+		window.location.href = "shop.html?group=" + group;
 	}
-	function go_to_upgrade(){
-		window.location.href="upgrade.html?group=" + group;
+	function go_to_upgrade() {
+		window.location.href = "upgrade.html?group=" + group;
 	}
 
 	function get_sunday_format(week_before) {
 		const today = new Date();
 		const dayOfWeek = today.getDay(); // 取得今天是周幾 (0: 周日, 1: 周一, ...)
 		const lastSunday = new Date(today); // 複製今天的日期
-		lastSunday.setDate(today.getDate()- dayOfWeek - 7*week_before); // 設定為上周日的日期
+		lastSunday.setDate(today.getDate() - dayOfWeek - 7 * week_before); // 設定為上周日的日期
 		const formattedDate = lastSunday.toISOString().slice(2, 10).replace(/-/g, '');// 格式化日期為 YYMMDD
 		return formattedDate;
 	}
@@ -117,33 +121,34 @@
 		}
 		return students;
 	}
-	async function load_care(){
+	async function load_care() {
 		var kids = await load_kids();
 		const care_system = document.getElementById("care_system");
 		const chinese_number = ['一', '二', '三', '四', '五', '六', '七', '八'];
 		let breakpoint = 8;
-		for(let i=0; i<8; i++){
+		for (let i = 0; i < 8; i++) {
 			const snapshot = await db.collection(group).doc(get_sunday_format(i)).get();
 			if (snapshot.exists) {
 				Object.keys(snapshot.data()).forEach(key => {
-					if(kids[key] === -1) kids[key] = i;
+					if (kids[key] === -1) kids[key] = i;
 				});
 			}
-			else{
+			else {
 				breakpoint = i;
 				break;
 			}
 		}
-		for(let i=0; i<Math.max(...Object.values(kids)); i++){
+		for (let i = 0; i < Math.max(...Object.values(kids)); i++) {
 			// 遍歷物件並篩選符合條件的鍵
-			let arr = Object.entries(kids).filter(([key, value]) => value === (i+1)).map(([key, value]) => key);
+			let arr = Object.entries(kids).filter(([key, value]) => value === (i + 1)).map(([key, value]) => key);
 			care_system.innerHTML += `<p class='line'>${chinese_number[i]}週沒出現：${arr.join(" ")}</p>`;
 		}
 		// 最大週次
-		if(breakpoint>0){
+		if (breakpoint > 0) {
 			let arr = Object.entries(kids).filter(([key, value]) => value === -1).map(([key, value]) => key);
-			care_system.innerHTML += `<p class='line'>${chinese_number[breakpoint-1]}週以上沒出現：${arr.join(" ")}</p>`;
+			care_system.innerHTML += `<p class='line'>${chinese_number[breakpoint - 1]}週以上沒出現：${arr.join(" ")}</p>`;
 		}
 	}
 </script>
+
 </html>

@@ -1,41 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
-    <title>松福兒崇點數系統</title>
+    <title>北區會堂兒崇點數系統</title>
     <link rel="stylesheet" href="normal.css">
     <style>
-		table {
+        table {
             width: 100%;
             border-collapse: collapse;
         }
-        table, th, td {
+
+        table,
+        th,
+        td {
             border: 1px solid #ccc;
         }
-        th, td {
+
+        th,
+        td {
             padding: 5px;
             text-align: center;
         }
+
         th {
             background-color: #555555;
             color: white;
         }
+
         .name {
             font-size: 200%;
         }
+
         .minus_input {
             font-size: 200%;
             width: 6vw;
-			margin-right: 2%;
+            margin-right: 2%;
         }
-	</style>
+    </style>
 </head>
+
 <body>
     <div class="header">
-        <div id="sys-title">松福兒崇點數系統</div>
+        <div id="sys-title">北區會堂兒崇點數系統</div>
         <ul>
             <li><a href="#" id="signinLink">簽到</a></li>
             <li><a href="#" id="scoreLink">加分</a></li>
@@ -45,27 +55,27 @@
     </div>
     <div class="content">
         <table class="table">
-          <thead>
-            <tr>
-              <th class="title">寶貝</th>
-              <th class="title">組別</th>
-              <th class="title">點數</th>
-              <th class="title">換點數</th>
-            </tr>
-          </thead>
-          <tbody id="panel">
-          </tbody>
+            <thead>
+                <tr>
+                    <th class="title">寶貝</th>
+                    <th class="title">組別</th>
+                    <th class="title">點數</th>
+                    <th class="title">換點數</th>
+                </tr>
+            </thead>
+            <tbody id="panel">
+            </tbody>
         </table>
     </div>
 </body>
-<script src="init_firestore.js" ></script>
+<script src="init_firestore.js"></script>
 <script>
-	const today = new Date().toISOString().slice(2, 10).replace(/-/g, '');
-	// 解析 URL 中的參數
-	const urlParams = new URLSearchParams(window.location.search);
-	const group = urlParams.get('group');
+    const today = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+    // 解析 URL 中的參數
+    const urlParams = new URLSearchParams(window.location.search);
+    const group = urlParams.get('group');
 
-	async function load_kids(group_) {
+    async function load_kids(group_) {
         var students = {};
         const snapshot = await db.collection('kids').where('group', '==', group_).get();
         if (!snapshot.empty) {
@@ -105,31 +115,31 @@
                 // 換點數
                 const minus_td = document.createElement('td');
                 const minus_input = document.createElement('input');
-				minus_input.type = 'number';
-				minus_input.className = 'minus_input';
-				minus_input.min = 1;
-				minus_input.max = 500;
-				minus_input.step = 1;
-				// minus_input.value = user_data['addition'];
+                minus_input.type = 'number';
+                minus_input.className = 'minus_input';
+                minus_input.min = 1;
+                minus_input.max = 500;
+                minus_input.step = 1;
+                // minus_input.value = user_data['addition'];
 
                 const minus_btn = document.createElement('button');
                 minus_btn.className = 'button blue';
                 minus_btn.innerText = `換點數`;
                 minus_btn.onclick = async () => {
-					if(minus_input.value != ''){
-						if(Number(user_data.total_point) < Number(minus_input.value)){
-							alert('點數不足');
-						}
-						else if (window.confirm(`確定要為"${student}"扣掉"${minus_input.value}點"換點數嗎?`)) {
-							user_data['total_point'] -= minus_input.value;
-							await db.collection('kids').doc(student).update({ ['total_point']: user_data['total_point'] });
-							studentPoint.textContent = user_data['total_point'];
-						}
-					}
+                    if (minus_input.value != '') {
+                        if (Number(user_data.total_point) < Number(minus_input.value)) {
+                            alert('點數不足');
+                        }
+                        else if (window.confirm(`確定要為"${student}"扣掉"${minus_input.value}點"換點數嗎?`)) {
+                            user_data['total_point'] -= minus_input.value;
+                            await db.collection('kids').doc(student).update({ ['total_point']: user_data['total_point'] });
+                            studentPoint.textContent = user_data['total_point'];
+                        }
+                    }
                 };
                 minus_td.appendChild(minus_input);
                 minus_td.appendChild(minus_btn);
-                studentDiv.appendChild(minus_td);                
+                studentDiv.appendChild(minus_td);
 
                 tableBody.appendChild(studentDiv);
             });
@@ -140,21 +150,22 @@
         appendRows(big_group);
     }
 
-	function parameter() {
-		// 將參數附加到各個鏈接上
-		document.getElementById("signinLink").href = "signin.html?group=" + group;
-		document.getElementById("scoreLink").href = "score.html?group=" + group;
-		document.getElementById("newFriendLink").href = "newfriend.html?group=" + group;
-		document.getElementById("managerLink").href = "manager.html?group=" + group;
-	}
+    function parameter() {
+        // 將參數附加到各個鏈接上
+        document.getElementById("signinLink").href = "signin.html?group=" + group;
+        document.getElementById("scoreLink").href = "score.html?group=" + group;
+        document.getElementById("newFriendLink").href = "newfriend.html?group=" + group;
+        document.getElementById("managerLink").href = "manager.html?group=" + group;
+    }
 
-	document.addEventListener("DOMContentLoaded", async function() {
-		if(group === "null"){
-			window.location.href = "index.html";
-		}
-		parameter();
-		creatTable();
-	});
+    document.addEventListener("DOMContentLoaded", async function () {
+        if (group === "null") {
+            window.location.href = "index.html";
+        }
+        parameter();
+        creatTable();
+    });
 
 </script>
+
 </html>

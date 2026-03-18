@@ -1,36 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
-    <title>松福兒崇點數系統</title>
+    <title>北區會堂兒崇點數系統</title>
     <link rel="stylesheet" href="normal.css">
     <style>
         table {
             width: 100%;
             border-collapse: collapse;
         }
-        table, th, td {
+
+        table,
+        th,
+        td {
             border: 1px solid #ccc;
         }
-        th, td {
+
+        th,
+        td {
             padding: 5px;
             text-align: center;
         }
+
         th {
             background-color: #555555;
             color: white;
         }
+
         .name {
             font-size: 200%;
         }
     </style>
 </head>
+
 <body>
     <div class="header">
-        <div id="sys-title">松福兒崇點數系統</div>
+        <div id="sys-title">北區會堂兒崇點數系統</div>
         <ul>
             <li><a href="#" id="signinLink">簽到</a></li>
             <li><a href="#" id="scoreLink">加分</a></li>
@@ -40,21 +49,21 @@
     </div>
     <div class="content">
         <table class="table">
-          <thead>
-            <tr>
-              <th class="title">寶貝</th>
-              <th class="title">組別</th>
-              <th class="title">升級</th>
-              <th class="title">降級</th>
-              <th class="title">隱藏</th>
-            </tr>
-          </thead>
-          <tbody id="panel">
-          </tbody>
+            <thead>
+                <tr>
+                    <th class="title">寶貝</th>
+                    <th class="title">組別</th>
+                    <th class="title">升級</th>
+                    <th class="title">降級</th>
+                    <th class="title">隱藏</th>
+                </tr>
+            </thead>
+            <tbody id="panel">
+            </tbody>
         </table>
     </div>
 </body>
-<script src="init_firestore.js" ></script>
+<script src="init_firestore.js"></script>
 <script>
     const today = new Date().toISOString().slice(2, 10).replace(/-/g, '');
     const urlParams = new URLSearchParams(window.location.search);
@@ -106,7 +115,7 @@
 
                 // 降級按鈕
                 const downgrade_td = document.createElement('td');
-                if(preGroup){
+                if (preGroup) {
                     const downgrade_btn = document.createElement('button');
                     downgrade_btn.className = 'button green';
                     downgrade_btn.innerText = `降級到${preGroup}`;
@@ -117,7 +126,7 @@
                     downgrade_td.appendChild(downgrade_btn);
                 }
                 studentDiv.appendChild(downgrade_td);
-                
+
                 // 隱藏按鈕
                 const hide_td = document.createElement('td');
                 const hide_btn = document.createElement('button');
@@ -148,12 +157,13 @@
         document.getElementById("managerLink").href = "manager.html?group=" + group;
     }
 
-    document.addEventListener("DOMContentLoaded", async function() {
-        if(group === "null"){
+    document.addEventListener("DOMContentLoaded", async function () {
+        if (group === "null") {
             window.location.href = "index.html";
         }
         parameter();
         creatTable();
     });
 </script>
+
 </html>

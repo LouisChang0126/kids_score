@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
-    <title>松福兒崇點數系統</title>
+    <title>北區會堂兒崇點數系統</title>
     <link rel="stylesheet" href="normal.css">
 </head>
+
 <body>
     <div class="header">
-        <div id="sys-title">松福兒崇點數系統</div>
+        <div id="sys-title">北區會堂兒崇點數系統</div>
         <ul>
             <li class="is-active"><a href="#" id="signinLink">簽到</a></li>
             <li><a href="#" id="scoreLink">加分</a></li>
@@ -24,7 +26,7 @@
         <div class="group" id="group-medium"></div>
         <div class="group" id="group-small"></div>
     </div>
-    <script src="init_firestore.js" ></script>
+    <script src="init_firestore.js"></script>
     <script>
         // const Today = new Date();
         // const yesterday = new Date(Today);
@@ -38,11 +40,11 @@
 
         async function load_signin() {
             var students = [];
-            const group_name = ['小寶','中寶','大寶'];
-            for(let group of group_name){
+            const group_name = ['小寶', '中寶', '大寶'];
+            for (let group of group_name) {
                 const snapshot = await db.collection(group).doc(today).get();
                 if (snapshot.exists) {
-                students = students.concat(Object.keys(snapshot.data()));  // 提取所有字段名稱（鍵）並存為數組
+                    students = students.concat(Object.keys(snapshot.data()));  // 提取所有字段名稱（鍵）並存為數組
                 }
             }
             return students;
@@ -63,46 +65,46 @@
         function createButton(studentNames) {
             var studentsDiv = document.getElementById('students-all-arrive');
             studentsDiv.innerHTML = '';  // 清空之前的按钮，以便重新创建
-            if(Object.keys(studentNames).length === 0){
+            if (Object.keys(studentNames).length === 0) {
                 const nobody = document.createElement('h1');
                 nobody.className = 'title';
                 nobody.textContent = "大家都到囉!!!";
                 studentsDiv.appendChild(nobody);
             }
-            else{
+            else {
                 Object.entries(studentNames).forEach(([name, group]) => {
-                const studentButton = document.createElement('button');
-                if(group == '大寶'){
-                    studentButton.className = 'button red';
-                    studentsDiv = document.getElementById('group-big');
-                }
-                else if(group == '中寶'){
-                    studentButton.className = 'button blue';
-                    studentsDiv = document.getElementById('group-medium');
-                }
-                else{
-                    studentButton.className = 'button green';
-                    studentsDiv = document.getElementById('group-small');
-                }
-                studentButton.textContent = name;
-
-                // 點名按鈕功能
-                studentButton.onclick = async () => {
-                    const JSON = {
-                        point: 0,
-                        ontime: false,
-                        seat: false,
-                        small_group: false,
-                        praise: false,
-                        addition: 0
+                    const studentButton = document.createElement('button');
+                    if (group == '大寶') {
+                        studentButton.className = 'button red';
+                        studentsDiv = document.getElementById('group-big');
                     }
-                    const snapshot = await db.collection(group).doc(today).set({ [name]: JSON }, { merge: true });
-                    // window.location.reload();
-                    studentButton.remove();
-                };
+                    else if (group == '中寶') {
+                        studentButton.className = 'button blue';
+                        studentsDiv = document.getElementById('group-medium');
+                    }
+                    else {
+                        studentButton.className = 'button green';
+                        studentsDiv = document.getElementById('group-small');
+                    }
+                    studentButton.textContent = name;
 
-                studentsDiv.appendChild(studentButton);
-                // studentsDiv.appendChild(document.createElement('br'));
+                    // 點名按鈕功能
+                    studentButton.onclick = async () => {
+                        const JSON = {
+                            point: 0,
+                            ontime: false,
+                            seat: false,
+                            small_group: false,
+                            praise: false,
+                            addition: 0
+                        }
+                        const snapshot = await db.collection(group).doc(today).set({ [name]: JSON }, { merge: true });
+                        // window.location.reload();
+                        studentButton.remove();
+                    };
+
+                    studentsDiv.appendChild(studentButton);
+                    // studentsDiv.appendChild(document.createElement('br'));
                 });
             }
         }
@@ -128,15 +130,16 @@
             document.getElementById("managerLink").href = "manager.html?group=" + group;
         }
 
-        document.addEventListener("DOMContentLoaded", async function() {
-            if(group === "null"){
+        document.addEventListener("DOMContentLoaded", async function () {
+            if (group === "null") {
                 window.location.href = "index.html";
             }
             parameter();
-            
+
             var difference = await getDifference();
             createButton(difference);
         });
     </script>
 </body>
+
 </html>
