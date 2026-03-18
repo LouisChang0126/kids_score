@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 
 <head>
     <meta charset="UTF-8">
@@ -7,165 +7,216 @@
     <script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
     <title>北區會堂兒崇點數系統</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="normal.css">
     <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        /* Student row card */
+        .student-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+            gap: 12px;
         }
+        .student-row:last-child { border-bottom: none; }
 
-        table,
-        th,
-        td {
-            border: 1px solid #ccc;
+        .student-info { flex: 1; }
+        .student-info .s-name {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 2px;
         }
-
-        th,
-        td {
-            padding: 5px;
+        .student-info .s-meta {
+            font-size: 13px;
+            color: var(--text-sub);
+        }
+        .point-text {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+            min-width: 52px;
             text-align: center;
         }
 
-        th {
-            background-color: #555555;
-            color: white;
+        /* Redeem input group */
+        .redeem-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .redeem-group input {
+            width: 72px;
+            padding: 8px 10px;
+            font-size: 16px;
+            text-align: center;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+        }
+        .redeem-btn {
+            padding: 8px 14px;
+            font-size: 14px;
+            font-weight: 600;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background .15s, transform .1s;
+        }
+        .redeem-btn:active { transform: scale(.96); }
+        .redeem-btn:hover  { background: #E04045; }
+
+        .section-divider {
+            padding: 12px 0 6px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-sub);
+            letter-spacing: .6px;
+            text-transform: uppercase;
         }
 
-        .name {
-            font-size: 200%;
+        .list-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 0 20px;
         }
 
-        .minus_input {
-            font-size: 200%;
-            width: 6vw;
-            margin-right: 2%;
+        /* Loader */
+        .loader {
+            display: flex; justify-content: center;
+            align-items: center; padding: 48px;
+            color: var(--text-sub); font-size: 14px; gap: 10px;
         }
+        .spinner {
+            width: 20px; height: 20px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 
 <body>
     <div class="header">
-        <div id="sys-title">北區會堂兒崇點數系統</div>
+        <div id="sys-title">北區會堂兒崇</div>
         <ul>
-            <li><a href="#" id="signinLink">簽到</a></li>
-            <li><a href="#" id="scoreLink">加分</a></li>
-            <li><a href="#" id="newFriendLink">新朋友</a></li>
-            <li class="is-active"><a href="#" id="managerLink">管理員</a></li>
+            <li><a href="#" id="signinLink">✅ 簽到</a></li>
+            <li><a href="#" id="scoreLink">⭐ 加分</a></li>
+            <li><a href="#" id="newFriendLink">🌟 新朋友</a></li>
+            <li class="is-active"><a href="#" id="managerLink">⚙️ 管理員</a></li>
         </ul>
     </div>
+
     <div class="content">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th class="title">寶貝</th>
-                    <th class="title">組別</th>
-                    <th class="title">點數</th>
-                    <th class="title">換點數</th>
-                </tr>
-            </thead>
-            <tbody id="panel">
-            </tbody>
-        </table>
+        <div>
+            <div class="section-title">換點數</div>
+            <div class="section-sub">輸入要扣除的點數，確認後即儲存</div>
+        </div>
+        <div id="panel">
+            <div class="loader"><div class="spinner"></div> 載入學生資料…</div>
+        </div>
     </div>
+
+    <script src="init_firestore.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const group = urlParams.get('group');
+
+        async function load_kids(grp) {
+            var students = {};
+            const snap = await db.collection('kids').where('group', '==', grp).get();
+            if (!snap.empty) snap.forEach(doc => { students[doc.id] = doc.data(); });
+            return students;
+        }
+
+        function buildRow(student, user_data) {
+            const row = document.createElement('div');
+            row.className = 'student-row';
+
+            const info = document.createElement('div');
+            info.className = 'student-info';
+            info.innerHTML = `<div class="s-name">${student}</div>
+                              <div class="s-meta">${user_data.group}</div>`;
+
+            const ptEl = document.createElement('div');
+            ptEl.className = 'point-text';
+            ptEl.textContent = user_data['total_point'];
+
+            const redeemGroup = document.createElement('div');
+            redeemGroup.className = 'redeem-group';
+
+            const input = document.createElement('input');
+            input.type = 'number'; input.min = 1; input.max = 500; input.step = 1;
+            input.placeholder = '0';
+
+            const btn = document.createElement('button');
+            btn.className = 'redeem-btn';
+            btn.textContent = '扣點';
+            btn.onclick = async () => {
+                if (!input.value) return;
+                if (Number(user_data.total_point) < Number(input.value)) {
+                    alert('點數不足'); return;
+                }
+                if (confirm(`確定要為「${student}」扣除 ${input.value} 點？`)) {
+                    user_data['total_point'] -= Number(input.value);
+                    await db.collection('kids').doc(student).update({ total_point: user_data['total_point'] });
+                    ptEl.textContent = user_data['total_point'];
+                    input.value = '';
+                }
+            };
+
+            redeemGroup.appendChild(input);
+            redeemGroup.appendChild(btn);
+            row.appendChild(info);
+            row.appendChild(ptEl);
+            row.appendChild(redeemGroup);
+            return row;
+        }
+
+        function appendSection(panel, groupData, label, color) {
+            if (Object.keys(groupData).length === 0) return;
+            const divider = document.createElement('div');
+            divider.className = 'section-divider';
+            divider.textContent = `${label}`;
+            divider.style.color = color;
+            panel.appendChild(divider);
+
+            const card = document.createElement('div');
+            card.className = 'list-card';
+            Object.entries(groupData).forEach(([s, d]) => card.appendChild(buildRow(s, d)));
+            panel.appendChild(card);
+        }
+
+        async function creatTable() {
+            const small = await load_kids('小寶');
+            const mid   = await load_kids('中寶');
+            const big   = await load_kids('大寶');
+            const panel = document.getElementById('panel');
+            panel.innerHTML = '';
+            appendSection(panel, small, '🟢 小寶', '#10B981');
+            appendSection(panel, mid,   '🔵 中寶', '#0EA5E9');
+            appendSection(panel, big,   '🔴 大寶', '#FF5A5F');
+        }
+
+        function parameter() {
+            document.getElementById("signinLink").href = "signin.html?group=" + group;
+            document.getElementById("scoreLink").href = "score.html?group=" + group;
+            document.getElementById("newFriendLink").href = "newfriend.html?group=" + group;
+            document.getElementById("managerLink").href = "manager.html?group=" + group;
+        }
+
+        document.addEventListener("DOMContentLoaded", async function () {
+            if (!group || group === "null") { window.location.href = "index.html"; return; }
+            parameter();
+            creatTable();
+        });
+    </script>
 </body>
-<script src="init_firestore.js"></script>
-<script>
-    const today = new Date().toISOString().slice(2, 10).replace(/-/g, '');
-    // 解析 URL 中的參數
-    const urlParams = new URLSearchParams(window.location.search);
-    const group = urlParams.get('group');
-
-    async function load_kids(group_) {
-        var students = {};
-        const snapshot = await db.collection('kids').where('group', '==', group_).get();
-        if (!snapshot.empty) {
-            snapshot.forEach(doc => {
-                students[doc.id] = doc.data();
-            });
-        }
-        return students;
-    }
-
-    async function creatTable() {
-        var small_group = await load_kids('小寶');
-        var mid_group = await load_kids('中寶');
-        var big_group = await load_kids('大寶');
-        const tableBody = document.getElementById('panel');
-
-        function appendRows(groupData) {
-            Object.entries(groupData).forEach(([student, user_data]) => {
-                const studentDiv = document.createElement('tr');
-                studentDiv.className = 'tr';
-
-                const studentName = document.createElement('td');
-                studentName.textContent = student;
-                studentName.className = 'name';
-                studentDiv.appendChild(studentName);
-
-                const studentGroup = document.createElement('td');
-                studentGroup.textContent = user_data.group;
-                studentGroup.className = 'name';
-                studentDiv.appendChild(studentGroup);
-
-                const studentPoint = document.createElement('td');
-                studentPoint.textContent = user_data['total_point'];
-                studentPoint.className = 'name';
-                studentDiv.appendChild(studentPoint);
-
-                // 換點數
-                const minus_td = document.createElement('td');
-                const minus_input = document.createElement('input');
-                minus_input.type = 'number';
-                minus_input.className = 'minus_input';
-                minus_input.min = 1;
-                minus_input.max = 500;
-                minus_input.step = 1;
-                // minus_input.value = user_data['addition'];
-
-                const minus_btn = document.createElement('button');
-                minus_btn.className = 'button blue';
-                minus_btn.innerText = `換點數`;
-                minus_btn.onclick = async () => {
-                    if (minus_input.value != '') {
-                        if (Number(user_data.total_point) < Number(minus_input.value)) {
-                            alert('點數不足');
-                        }
-                        else if (window.confirm(`確定要為"${student}"扣掉"${minus_input.value}點"換點數嗎?`)) {
-                            user_data['total_point'] -= minus_input.value;
-                            await db.collection('kids').doc(student).update({ ['total_point']: user_data['total_point'] });
-                            studentPoint.textContent = user_data['total_point'];
-                        }
-                    }
-                };
-                minus_td.appendChild(minus_input);
-                minus_td.appendChild(minus_btn);
-                studentDiv.appendChild(minus_td);
-
-                tableBody.appendChild(studentDiv);
-            });
-        }
-
-        appendRows(small_group);
-        appendRows(mid_group);
-        appendRows(big_group);
-    }
-
-    function parameter() {
-        // 將參數附加到各個鏈接上
-        document.getElementById("signinLink").href = "signin.html?group=" + group;
-        document.getElementById("scoreLink").href = "score.html?group=" + group;
-        document.getElementById("newFriendLink").href = "newfriend.html?group=" + group;
-        document.getElementById("managerLink").href = "manager.html?group=" + group;
-    }
-
-    document.addEventListener("DOMContentLoaded", async function () {
-        if (group === "null") {
-            window.location.href = "index.html";
-        }
-        parameter();
-        creatTable();
-    });
-
-</script>
 
 </html>

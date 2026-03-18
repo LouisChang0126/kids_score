@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 
 <head>
     <meta charset="UTF-8">
@@ -7,163 +7,204 @@
     <script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
     <title>北區會堂兒崇點數系統</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="normal.css">
     <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        .student-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+            gap: 10px;
+        }
+        .student-row:last-child { border-bottom: none; }
+
+        .student-info { flex: 1; }
+        .s-name  { font-size: 17px; font-weight: 700; margin-bottom: 2px; }
+        .s-group { font-size: 13px; color: var(--text-sub); }
+
+        .action-btns {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .upgrade-btn, .downgrade-btn, .hide-btn {
+            padding: 8px 13px;
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: filter .15s, transform .1s;
+            color: #fff;
+        }
+        .upgrade-btn:active, .downgrade-btn:active, .hide-btn:active { transform: scale(.95); }
+        .upgrade-btn   { background: #0EA5E9; }
+        .upgrade-btn:hover { filter: brightness(.9); }
+        .downgrade-btn { background: #10B981; }
+        .downgrade-btn:hover { filter: brightness(.9); }
+        .hide-btn      { background: #FF5A5F; }
+        .hide-btn:hover { filter: brightness(.9); }
+
+        .section-divider {
+            padding: 12px 0 6px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-sub);
+            letter-spacing: .6px;
+            text-transform: uppercase;
+        }
+        .list-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 0 20px;
         }
 
-        table,
-        th,
-        td {
-            border: 1px solid #ccc;
+        .loader {
+            display: flex; justify-content: center;
+            align-items: center; padding: 48px;
+            color: var(--text-sub); font-size: 14px; gap: 10px;
         }
-
-        th,
-        td {
-            padding: 5px;
-            text-align: center;
+        .spinner {
+            width: 20px; height: 20px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
         }
-
-        th {
-            background-color: #555555;
-            color: white;
-        }
-
-        .name {
-            font-size: 200%;
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 
 <body>
     <div class="header">
-        <div id="sys-title">北區會堂兒崇點數系統</div>
+        <div id="sys-title">北區會堂兒崇</div>
         <ul>
-            <li><a href="#" id="signinLink">簽到</a></li>
-            <li><a href="#" id="scoreLink">加分</a></li>
-            <li><a href="#" id="newFriendLink">新朋友</a></li>
-            <li class="is-active"><a href="#" id="managerLink">管理員</a></li>
+            <li><a href="#" id="signinLink">✅ 簽到</a></li>
+            <li><a href="#" id="scoreLink">⭐ 加分</a></li>
+            <li><a href="#" id="newFriendLink">🌟 新朋友</a></li>
+            <li class="is-active"><a href="#" id="managerLink">⚙️ 管理員</a></li>
         </ul>
     </div>
+
     <div class="content">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th class="title">寶貝</th>
-                    <th class="title">組別</th>
-                    <th class="title">升級</th>
-                    <th class="title">降級</th>
-                    <th class="title">隱藏</th>
-                </tr>
-            </thead>
-            <tbody id="panel">
-            </tbody>
-        </table>
+        <div>
+            <div class="section-title">兒童升降級</div>
+            <div class="section-sub">調整學生的組別或將其隱藏</div>
+        </div>
+        <div id="panel">
+            <div class="loader"><div class="spinner"></div> 載入學生資料…</div>
+        </div>
     </div>
-</body>
-<script src="init_firestore.js"></script>
-<script>
-    const today = new Date().toISOString().slice(2, 10).replace(/-/g, '');
-    const urlParams = new URLSearchParams(window.location.search);
-    const group = urlParams.get('group');
 
-    async function load_kids(group_) {
-        var students = {};
-        const snapshot = await db.collection('kids').where('group', '==', group_).get();
-        if (!snapshot.empty) {
-            snapshot.forEach(doc => {
-                students[doc.id] = doc.data();
-            });
+    <script src="init_firestore.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const group = urlParams.get('group');
+
+        async function load_kids(grp) {
+            var students = {};
+            const snap = await db.collection('kids').where('group', '==', grp).get();
+            if (!snap.empty) snap.forEach(doc => { students[doc.id] = doc.data(); });
+            return students;
         }
-        return students;
-    }
 
-    async function creatTable() {
-        var small_group = await load_kids('小寶');
-        var mid_group = await load_kids('中寶');
-        var big_group = await load_kids('大寶');
-        const tableBody = document.getElementById('panel');
+        function buildRow(student, user_data, nextGroup, preGroup) {
+            const row = document.createElement('div');
+            row.className = 'student-row';
 
-        function appendRows(groupData, nextGroup, preGroup) {
-            Object.entries(groupData).forEach(([student, user_data]) => {
-                const studentDiv = document.createElement('tr');
-                studentDiv.className = 'tr';
+            const info = document.createElement('div');
+            info.className = 'student-info';
+            info.innerHTML = `<div class="s-name">${student}</div>
+                              <div class="s-group">${user_data.group}</div>`;
 
-                const studentName = document.createElement('td');
-                studentName.textContent = student;
-                studentName.className = 'name';
-                studentDiv.appendChild(studentName);
+            const btns = document.createElement('div');
+            btns.className = 'action-btns';
 
-                const studentGroup = document.createElement('td');
-                studentGroup.textContent = user_data.group;
-                studentGroup.className = 'name';
-                studentDiv.appendChild(studentGroup);
-
-                // 升級按鈕
-                const upgrade_td = document.createElement('td');
-                const upgrade_btn = document.createElement('button');
-                upgrade_btn.className = 'button blue';
-                upgrade_btn.innerText = `升級到${nextGroup}`;
-                upgrade_btn.onclick = async () => {
-                    await db.collection('kids').doc(student).update({ ['group']: nextGroup });
+            // Upgrade
+            const upBtn = document.createElement('button');
+            upBtn.className = 'upgrade-btn';
+            upBtn.textContent = `⬆ ${nextGroup}`;
+            upBtn.onclick = async () => {
+                if (confirm(`升級「${student}」到 ${nextGroup}？`)) {
+                    await db.collection('kids').doc(student).update({ group: nextGroup });
                     window.location.reload();
-                };
-                upgrade_td.appendChild(upgrade_btn);
-                studentDiv.appendChild(upgrade_td);
-
-                // 降級按鈕
-                const downgrade_td = document.createElement('td');
-                if (preGroup) {
-                    const downgrade_btn = document.createElement('button');
-                    downgrade_btn.className = 'button green';
-                    downgrade_btn.innerText = `降級到${preGroup}`;
-                    downgrade_btn.onclick = async () => {
-                        await db.collection('kids').doc(student).update({ ['group']: preGroup });
-                        window.location.reload();
-                    };
-                    downgrade_td.appendChild(downgrade_btn);
                 }
-                studentDiv.appendChild(downgrade_td);
+            };
+            btns.appendChild(upBtn);
 
-                // 隱藏按鈕
-                const hide_td = document.createElement('td');
-                const hide_btn = document.createElement('button');
-                hide_btn.className = 'button red';
-                hide_btn.innerText = '✖';
-                hide_btn.onclick = async () => {
-                    if (window.confirm(`隱藏會使寶貝永遠不再顯示\n確定要將"${student}"隱藏嗎？(只有管理員可以復原)`)) {
-                        await db.collection('kids').doc(student).update({ ['group']: '隱藏' });
+            // Downgrade
+            if (preGroup) {
+                const downBtn = document.createElement('button');
+                downBtn.className = 'downgrade-btn';
+                downBtn.textContent = `⬇ ${preGroup}`;
+                downBtn.onclick = async () => {
+                    if (confirm(`降級「${student}」到 ${preGroup}？`)) {
+                        await db.collection('kids').doc(student).update({ group: preGroup });
                         window.location.reload();
                     }
                 };
-                hide_td.appendChild(hide_btn);
-                studentDiv.appendChild(hide_td);
+                btns.appendChild(downBtn);
+            }
 
-                tableBody.appendChild(studentDiv);
-            });
+            // Hide
+            const hideBtn = document.createElement('button');
+            hideBtn.className = 'hide-btn';
+            hideBtn.textContent = '✖';
+            hideBtn.onclick = async () => {
+                if (confirm(`隱藏「${student}」？隱藏後將不再顯示（管理員可復原）`)) {
+                    await db.collection('kids').doc(student).update({ group: '隱藏' });
+                    window.location.reload();
+                }
+            };
+            btns.appendChild(hideBtn);
+
+            row.appendChild(info);
+            row.appendChild(btns);
+            return row;
         }
 
-        appendRows(small_group, '中寶', '');
-        appendRows(mid_group, '大寶', '小寶');
-        appendRows(big_group, '新世代', '中寶');
-    }
+        function appendSection(panel, groupData, label, nextGroup, preGroup, color) {
+            if (Object.keys(groupData).length === 0) return;
+            const div = document.createElement('div');
+            div.className = 'section-divider';
+            div.textContent = label;
+            div.style.color = color;
+            panel.appendChild(div);
 
-    function parameter() {
-        document.getElementById("signinLink").href = "signin.html?group=" + group;
-        document.getElementById("scoreLink").href = "score.html?group=" + group;
-        document.getElementById("newFriendLink").href = "newfriend.html?group=" + group;
-        document.getElementById("managerLink").href = "manager.html?group=" + group;
-    }
-
-    document.addEventListener("DOMContentLoaded", async function () {
-        if (group === "null") {
-            window.location.href = "index.html";
+            const card = document.createElement('div');
+            card.className = 'list-card';
+            Object.entries(groupData).forEach(([s, d]) => card.appendChild(buildRow(s, d, nextGroup, preGroup)));
+            panel.appendChild(card);
         }
-        parameter();
-        creatTable();
-    });
-</script>
+
+        async function creatTable() {
+            const small = await load_kids('小寶');
+            const mid   = await load_kids('中寶');
+            const big   = await load_kids('大寶');
+            const panel = document.getElementById('panel');
+            panel.innerHTML = '';
+            appendSection(panel, small, '🟢 小寶', '中寶', '',   '#10B981');
+            appendSection(panel, mid,   '🔵 中寶', '大寶', '小寶', '#0EA5E9');
+            appendSection(panel, big,   '🔴 大寶', '新世代', '中寶', '#FF5A5F');
+        }
+
+        function parameter() {
+            document.getElementById("signinLink").href = "signin.html?group=" + group;
+            document.getElementById("scoreLink").href = "score.html?group=" + group;
+            document.getElementById("newFriendLink").href = "newfriend.html?group=" + group;
+            document.getElementById("managerLink").href = "manager.html?group=" + group;
+        }
+
+        document.addEventListener("DOMContentLoaded", async function () {
+            if (!group || group === "null") { window.location.href = "index.html"; return; }
+            parameter();
+            creatTable();
+        });
+    </script>
+</body>
 
 </html>

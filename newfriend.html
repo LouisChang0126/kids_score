@@ -1,186 +1,189 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
-	<script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
-	<title>北區會堂兒崇點數系統</title>
-	<link rel="stylesheet" href="normal.css">
-	<style>
-		.container {
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			margin-top: 70px;
-			gap: 30px;
-		}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
+    <title>北區會堂兒崇點數系統</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="normal.css">
+    <style>
+        /* Form card */
+        .form-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px 20px;
+        }
+        .form-card h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text-main);
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-sub);
+            margin-bottom: 8px;
+            letter-spacing: .3px;
+        }
+        /* Radio group */
+        .radio-group {
+            display: flex;
+            gap: 10px;
+        }
+        .radio-option {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 8px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: border-color .2s, background .2s;
+            color: var(--text-sub);
+            position: relative;
+        }
+        .radio-option input[type="radio"] {
+            position: absolute; opacity: 0; width: 0; height: 0;
+        }
+        .radio-option:has(input:checked) {
+            border-color: var(--primary);
+            background: #FFF0F0;
+            color: var(--primary);
+        }
 
-		form {
-			margin: 20px auto;
-			padding: 20px;
-			border: 1px solid #ddd;
-			border-radius: 10px;
-			background-color: #f9f9f9;
-			width: 80vw;
-			font-size: 200%;
-		}
+        /* Submit button */
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: #fff;
+            font-family: var(--font);
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: background .2s, transform .1s;
+            margin-top: 8px;
+        }
+        .submit-btn:hover { background: #E04045; }
+        .submit-btn:active { transform: scale(.98); }
 
-		label {
-			display: inline-flex;
-			align-items: center;
-			cursor: pointer;
-			margin: 10px;
-		}
-
-		/* 隱藏默認的 Radio */
-		input[type="radio"] {
-			display: none;
-		}
-
-		/* 自訂 Radio 外觀 */
-		.custom-radio {
-			width: 20px;
-			height: 20px;
-			border: 2px solid #4CAF50;
-			border-radius: 50%;
-			margin-right: 10px;
-			display: inline-block;
-			position: relative;
-		}
-
-		/* Radio 被選中時的樣式 */
-		input[type="radio"]:checked+.custom-radio {
-			background-color: #4CAF50;
-		}
-
-		/* 選中的圓點 */
-		input[type="radio"]:checked+.custom-radio::after {
-			content: "";
-			width: 10px;
-			height: 10px;
-			background-color: #fff;
-			border-radius: 50%;
-			position: absolute;
-			top: 50%;
-			left: 50%;
-			transform: translate(-50%, -50%);
-		}
-
-		button {
-			font-size: 100%;
-		}
-
-		input[type="text"] {
-			font-size: 100%;
-			/* 與表單的字體大小相匹配 */
-			padding: 10px;
-			/* 增加內邊距讓外觀更整齊 */
-			width: 60%;
-			box-sizing: border-box;
-			/* 包括內邊距與邊框計算在內 */
-		}
-	</style>
+        /* Info message */
+        .info-msg {
+            margin-top: 14px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .info-msg.success { background: #D1FAE5; color: #065F46; }
+        .info-msg.error   { background: #FEE2E2; color: #991B1B; }
+    </style>
 </head>
 
 <body>
-	<div class="header">
-		<div id="sys-title">北區會堂兒崇點數系統</div>
-		<ul>
-			<li><a href="#" id="signinLink">簽到</a></li>
-			<li><a href="#" id="scoreLink">加分</a></li>
-			<li class="is-active"><a href="#" id="newFriendLink">新朋友</a></li>
-			<li><a href="#" id="managerLink">管理員</a></li>
-		</ul>
-	</div>
-	<div class="container">
-		<form id="groupForm">
-			<h3>請填寫以下資料</h3>
+    <div class="header">
+        <div id="sys-title">北區會堂兒崇</div>
+        <ul>
+            <li><a href="#" id="signinLink">✅ 簽到</a></li>
+            <li><a href="#" id="scoreLink">⭐ 加分</a></li>
+            <li class="is-active"><a href="#" id="newFriendLink">🌟 新朋友</a></li>
+            <li><a href="#" id="managerLink">⚙️ 管理員</a></li>
+        </ul>
+    </div>
 
-			<!-- 姓名輸入 -->
-			<label for="name">姓名：</label>
-			<input type="text" id="name" name="name" placeholder="請輸入姓名" required>
-			<br><br>
+    <div class="content">
+        <div>
+            <div class="section-title">新朋友報到</div>
+            <div class="section-sub">填寫資料將新學生加入系統</div>
+        </div>
 
-			<!-- 組別選項 -->
-			<label>組別：</label>
-			<label>
-				<input type="radio" name="group" value="大寶" required>
-				<span class="custom-radio"></span> 大寶
-			</label>
+        <div class="form-card">
+            <form id="groupForm">
+                <div class="form-group">
+                    <label class="form-label" for="name">姓名</label>
+                    <input type="text" id="name" name="name" placeholder="請輸入小朋友的名字" required>
+                </div>
 
-			<label>
-				<input type="radio" name="group" value="中寶" required>
-				<span class="custom-radio"></span> 中寶
-			</label>
+                <div class="form-group">
+                    <label class="form-label">組別</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="group" value="大寶" required>
+                            大寶
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="group" value="中寶">
+                            中寶
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="group" value="小寶">
+                            小寶
+                        </label>
+                    </div>
+                </div>
 
-			<label>
-				<input type="radio" name="group" value="小寶" required>
-				<span class="custom-radio"></span> 小寶
-			</label>
-			<br><br>
+                <button type="submit" class="submit-btn">確認新增</button>
+                <div id="show-info" class="info-msg" style="display:none"></div>
+            </form>
+        </div>
+    </div>
 
-			<!-- 提交按鈕 -->
-			<button type="submit">提交</button>
+    <script src="init_firestore.js"></script>
+    <script>
+        const today = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+        const urlParams = new URLSearchParams(window.location.search);
+        const group = urlParams.get('group');
 
-			<p id="show-info"></p>
-		</form>
-	</div>
+        function parameter() {
+            document.getElementById("signinLink").href = "signin.html?group=" + group;
+            document.getElementById("scoreLink").href = "score.html?group=" + group;
+            document.getElementById("managerLink").href = "manager.html?group=" + group;
+        }
+
+        document.addEventListener("DOMContentLoaded", async function () {
+            if (!group || group === "null") { window.location.href = "index.html"; return; }
+            parameter();
+        });
+
+        const form = document.getElementById('groupForm');
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const name = document.getElementById('name').value.trim();
+            const selectedGroup = document.querySelector('input[name="group"]:checked');
+            if (!selectedGroup) { alert('請選擇組別'); return; }
+            const groupVal = selectedGroup.value;
+            const infoEl = document.getElementById('show-info');
+
+            const docSnap = await db.collection('kids').doc(name).get();
+            if (docSnap.exists) {
+                infoEl.className = 'info-msg error';
+                infoEl.textContent = `「${name}」已存在於系統中`;
+                infoEl.style.display = 'block';
+            } else {
+                await db.collection('kids').doc(name).set({ total_point: 0, group: groupVal });
+                infoEl.className = 'info-msg success';
+                infoEl.textContent = `✅ 已成功新增 ${name}（${groupVal}）`;
+                infoEl.style.display = 'block';
+                document.getElementById('name').value = '';
+                document.querySelectorAll('input[name="group"]').forEach(r => r.checked = false);
+            }
+        });
+    </script>
 </body>
-<script src="init_firestore.js"></script>
-
-<script>
-	const today = new Date().toISOString().slice(2, 10).replace(/-/g, '');
-	// 解析 URL 中的參數
-	const urlParams = new URLSearchParams(window.location.search);
-	const group = urlParams.get('group');
-
-	function parameter() {
-		// 將參數附加到各個鏈接上
-		document.getElementById("signinLink").href = "signin.html?group=" + group;
-		document.getElementById("scoreLink").href = "score.html?group=" + group;
-		document.getElementById("managerLink").href = "manager.html?group=" + group;
-	}
-
-	document.addEventListener("DOMContentLoaded", async function () {
-		if (group === "null") {
-			window.location.href = "index.html";
-		}
-
-		parameter();
-	});
-
-	// 表單提交事件處理
-	const form = document.getElementById('groupForm');
-	form.addEventListener('submit', async (event) => {
-		event.preventDefault(); // 阻止默認提交行為
-
-		// 獲取表單數據
-		const name = document.getElementById('name').value;
-		const group = document.querySelector('input[name="group"]:checked').value;
-
-		const docSnap = await db.collection('kids').doc(name).get();
-		if (docSnap.exists) {
-			document.getElementById('show-info').innerText = `已經有這個小孩的名字了`;
-		}
-		else {
-			await db.collection('kids').doc(name).set({
-				total_point: 0,
-				group: group
-			});
-			document.getElementById('show-info').innerText = `以新增 ${name} 到 ${group}`;
-		}
-
-		// 清空姓名輸入框
-		document.getElementById('name').value = "";
-
-		// 清空選中的 radio 按鈕
-		const radios = document.querySelectorAll('input[name="group"]');
-		radios.forEach(radio => {
-			radio.checked = false;
-		});
-	});
-</script>
 
 </html>

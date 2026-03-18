@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 
 <head>
     <meta charset="UTF-8">
@@ -7,301 +7,342 @@
     <script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
     <title>北區會堂兒崇點數系統</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="normal.css">
     <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        /* Score cards — stack vertically on mobile, each student is a card */
+        .student-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .student-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .student-name {
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .score-pills {
+            display: flex;
+            gap: 8px;
+        }
+        .score-pill {
+            font-size: 13px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 999px;
+            background: var(--surface);
+            color: var(--text-sub);
+            white-space: nowrap;
+        }
+        .score-pill.today {
+            background: #FFF0F0;
+            color: var(--primary);
         }
 
-        table,
-        th,
-        td {
-            border: 1px solid #ccc;
+        /* Seal row */
+        .seal-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+        .seal-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            padding: 8px 4px;
+            border-radius: 10px;
+            border: 1.5px solid var(--border);
+            background: var(--surface);
+            transition: background .2s, border-color .2s, transform .1s;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .seal-cell:active { transform: scale(.95); }
+        .seal-cell.active {
+            background: #FFF0F0;
+            border-color: var(--primary);
+        }
+        .seal-cell img {
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+            opacity: .25;
+            transition: opacity .2s;
+        }
+        .seal-cell.active img { opacity: 1; }
+        .seal-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-sub);
+            text-align: center;
+        }
+        .seal-cell.active .seal-label { color: var(--primary); }
+        .seal-badge {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 1px 6px;
+            background: #DDDDDD;
+            border-radius: 999px;
+            color: #555;
+        }
+        .seal-cell.active .seal-badge {
+            background: var(--primary);
+            color: #fff;
         }
 
-        th,
-        td {
-            padding: 5px;
+        /* Extra points row */
+        .extra-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .extra-row label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-sub);
+            white-space: nowrap;
+        }
+        .extra-row input {
+            width: 90px;
+            padding: 8px 12px;
+            font-size: 16px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
             text-align: center;
         }
 
-        th {
-            background-color: #555555;
-            color: white;
+        /* Loader */
+        .loader {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 60px;
+            color: var(--text-sub);
+            font-size: 15px;
+            gap: 10px;
         }
-
-        .seal-block {
-            width: 9vw;
-            height: 9vw;
+        .spinner {
+            width: 22px; height: 22px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
         }
-
-        .addition_input {
-            font-size: 200%;
-            width: 6vw;
-        }
-
-        .seal {
-            width: calc(9vw - 10px);
-            height: calc(9vw - 10px);
-        }
-
-        .score_num {
-            font-size: 200%;
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 
 <body>
     <div class="header">
-        <div id="sys-title">北區會堂兒崇點數系統</div>
+        <div id="sys-title">北區會堂兒崇</div>
         <ul>
-            <li><a href="#" id="signinLink">簽到</a></li>
-            <li class="is-active"><a href="#" id="scoreLink">加分</a></li>
-            <li><a href="#" id="newFriendLink">新朋友</a></li>
-            <li><a href="#" id="managerLink">管理員</a></li>
+            <li><a href="#" id="signinLink">✅ 簽到</a></li>
+            <li class="is-active"><a href="#" id="scoreLink">⭐ 加分</a></li>
+            <li><a href="#" id="newFriendLink">🌟 新朋友</a></li>
+            <li><a href="#" id="managerLink">⚙️ 管理員</a></li>
         </ul>
     </div>
+
     <div class="content">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th class="title">寶貝</th>
-                    <th class="title">累計點數</th>
-                    <th class="title">今天點數</th>
-                    <th class="title">準時</th>
-                    <th class="title">專心敬拜</th>
-                    <th class="title">搬椅子</th>
-                    <th class="title">小組討論</th>
-                    <th class="title">額外加點</th>
-                </tr>
-            </thead>
-            <tbody id="panel">
-
-            </tbody>
-        </table>
+        <div>
+            <div class="section-title">加分評分</div>
+            <div class="section-sub" id="date-label"></div>
+        </div>
+        <div id="panel">
+            <div class="loader" id="loader">
+                <div class="spinner"></div> 載入中…
+            </div>
+        </div>
     </div>
-</body>
-<script src="init_firestore.js"></script>
 
-<script>
-    const today = new Date().toISOString().slice(2, 10).replace(/-/g, '');
-    // 解析 URL 中的參數
-    const urlParams = new URLSearchParams(window.location.search);
-    const group = urlParams.get('group');
+    <script src="init_firestore.js"></script>
+    <script>
+        const today = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+        const urlParams = new URLSearchParams(window.location.search);
+        const group = urlParams.get('group');
 
-    async function load_this_week() {
-        var students = [];
-        const snapshot = await db.collection(group).doc(today).get();
-        if (snapshot.exists) {
-            students = Object(snapshot.data());  // 提取所有字段名稱（鍵）並存為數組
+        const d = new Date();
+        document.getElementById('date-label').textContent =
+            `${d.getFullYear()} 年 ${d.getMonth()+1} 月 ${d.getDate()} 日 · ${group}`;
+
+        async function load_this_week() {
+            var students = [];
+            const snapshot = await db.collection(group).doc(today).get();
+            if (snapshot.exists) { students = Object(snapshot.data()); }
+            return students;
         }
-        return students;
-    }
 
-    async function load_kids() {
-        var students = {};
-        const snapshot = await db.collection('kids').where('group', '==', group).get();
-        if (!snapshot.empty) {
-            snapshot.forEach(doc => {
-                students[doc.id] = doc.data(); // 提取每個文件的資料
-            });
+        async function load_kids() {
+            var students = {};
+            const snapshot = await db.collection('kids').where('group', '==', group).get();
+            if (!snapshot.empty) {
+                snapshot.forEach(doc => { students[doc.id] = doc.data(); });
+            }
+            return students;
         }
-        return students;
-    }
 
-    async function creatTable() {
-        var signin_week = await load_this_week();
-        var signin_user = await load_kids();
-        const studentsScoresDiv = document.getElementById('panel');
+        function makeSealCell(imgSrc, label, badge, isActive, onToggle) {
+            const cell = document.createElement('div');
+            cell.className = 'seal-cell' + (isActive ? ' active' : '');
 
-        if (Object.keys(signin_week).length === 0) {
-            alert("今天尚未點名！");
-            window.location.href = "signin.html?group=" + group;
+            const img = document.createElement('img');
+            img.src = imgSrc;
+
+            const lbl = document.createElement('div');
+            lbl.className = 'seal-label';
+            lbl.textContent = label;
+
+            const bdg = document.createElement('div');
+            bdg.className = 'seal-badge';
+            bdg.textContent = badge;
+
+            cell.appendChild(img);
+            cell.appendChild(lbl);
+            cell.appendChild(bdg);
+
+            cell.onclick = async () => {
+                const nowActive = cell.classList.toggle('active');
+                await onToggle(nowActive);
+            };
+            return cell;
         }
-        else {
-            // 按照键（学生名字）进行排序
-            const sortedEntries = Object.entries(signin_week).sort(([studentA], [studentB]) => studentA.localeCompare(studentB));
 
-            sortedEntries.forEach(([student, user_data]) => {
+        async function creatTable() {
+            const signin_week = await load_this_week();
+            const signin_user = await load_kids();
+            const panel = document.getElementById('panel');
+            panel.innerHTML = '';
+
+            if (Object.keys(signin_week).length === 0) {
+                alert("今天尚未點名！");
+                window.location.href = "signin.html?group=" + group;
+                return;
+            }
+
+            const sorted = Object.entries(signin_week).sort(([a], [b]) => a.localeCompare(b));
+
+            sorted.forEach(([student, user_data]) => {
                 let total_point = signin_user[student]['total_point'];
 
-                const studentDiv = document.createElement('tr');
-                studentDiv.className = 'tr';
+                const card = document.createElement('div');
+                card.className = 'student-card';
 
-                const studentName = document.createElement('td');
-                studentName.textContent = student;
-                studentName.className = 'score_num';
-                studentDiv.appendChild(studentName);
+                // Header: name + score pills
+                const header = document.createElement('div');
+                header.className = 'student-card-header';
 
-                const total_score = document.createElement('td');
-                total_score.textContent = `+ ${total_point}`;
-                total_score.className = 'score_num';
-                studentDiv.appendChild(total_score);
+                const name = document.createElement('div');
+                name.className = 'student-name';
+                name.textContent = student;
 
-                const score = document.createElement('td');
-                score.textContent = `+ ${user_data['point']}`;
-                score.className = 'score_num';
-                studentDiv.appendChild(score);
+                const pills = document.createElement('div');
+                pills.className = 'score-pills';
 
-                // 準時+3按鈕
-                const ontime_td = document.createElement('td');
-                const ontime_seal = document.createElement('img');
-                ontime_td.className = 'seal-block';
-                ontime_seal.src = "image/ontime.png";
-                ontime_seal.className = "seal"
-                ontime_seal.hidden = !user_data['ontime'];
-                ontime_td.onclick = async () => {
-                    if (ontime_seal.hidden) {
-                        ontime_seal.hidden = false;
-                        user_data['point'] += 3;
-                        user_data['ontime'] = true;
-                        total_point += 3;
-                    }
-                    else {
-                        ontime_seal.hidden = true;
-                        user_data['point'] -= 3;
-                        user_data['ontime'] = false;
-                        total_point -= 3;
-                    }
+                const totalPill = document.createElement('div');
+                totalPill.className = 'score-pill';
+                totalPill.textContent = `累計 ${total_point}`;
+
+                const todayPill = document.createElement('div');
+                todayPill.className = 'score-pill today';
+                todayPill.textContent = `今日 +${user_data['point']}`;
+
+                pills.appendChild(totalPill);
+                pills.appendChild(todayPill);
+                header.appendChild(name);
+                header.appendChild(pills);
+                card.appendChild(header);
+
+                // Seal row
+                const sealRow = document.createElement('div');
+                sealRow.className = 'seal-row';
+
+                const updateDB = async () => {
+                    totalPill.textContent = `累計 ${total_point}`;
+                    todayPill.textContent = `今日 +${user_data['point']}`;
                     await db.collection(group).doc(today).update({ [student]: user_data });
-                    await db.collection('kids').doc(student).update({ ['total_point']: total_point });
-                    total_score.textContent = `+ ${total_point}`;
-                    score.textContent = `+ ${user_data['point']}`;
+                    await db.collection('kids').doc(student).update({ total_point });
                 };
-                ontime_td.appendChild(ontime_seal);
-                studentDiv.appendChild(ontime_td);
 
-                // 專心敬拜+2按鈕
-                const praise_td = document.createElement('td');
-                const praise_seal = document.createElement('img');
-                praise_td.className = 'seal-block';
-                praise_seal.src = "image/praise.png";
-                praise_seal.className = "seal"
-                praise_seal.hidden = !user_data['praise'];
-                praise_td.onclick = async () => {
-                    if (praise_seal.hidden) {
-                        praise_seal.hidden = false;
-                        user_data['point'] += 2;
-                        user_data['praise'] = true;
-                        total_point += 2;
-                    }
-                    else {
-                        praise_seal.hidden = true;
-                        user_data['point'] -= 2;
-                        user_data['praise'] = false;
-                        total_point -= 2;
-                    }
-                    await db.collection(group).doc(today).update({ [student]: user_data });
-                    await db.collection('kids').doc(student).update({ ['total_point']: total_point });
-                    total_score.textContent = `+ ${total_point}`;
-                    score.textContent = `+ ${user_data['point']}`;
-                };
-                praise_td.appendChild(praise_seal);
-                studentDiv.appendChild(praise_td);
+                sealRow.appendChild(makeSealCell('image/ontime.png', '準時', '+3', user_data['ontime'], async (active) => {
+                    user_data['point'] += active ? 3 : -3;
+                    total_point += active ? 3 : -3;
+                    user_data['ontime'] = active;
+                    await updateDB();
+                }));
+                sealRow.appendChild(makeSealCell('image/praise.png', '專心敬拜', '+2', user_data['praise'], async (active) => {
+                    user_data['point'] += active ? 2 : -2;
+                    total_point += active ? 2 : -2;
+                    user_data['praise'] = active;
+                    await updateDB();
+                }));
+                sealRow.appendChild(makeSealCell('image/seat.png', '搬椅子', '+1', user_data['seat'], async (active) => {
+                    user_data['point'] += active ? 1 : -1;
+                    total_point += active ? 1 : -1;
+                    user_data['seat'] = active;
+                    await updateDB();
+                }));
+                sealRow.appendChild(makeSealCell('image/small_group.png', '小組討論', '+1', user_data['small_group'], async (active) => {
+                    user_data['point'] += active ? 1 : -1;
+                    total_point += active ? 1 : -1;
+                    user_data['small_group'] = active;
+                    await updateDB();
+                }));
 
-                // 搬椅子+1按鈕
-                const seat_td = document.createElement('td');
-                const seat_seal = document.createElement('img');
-                seat_td.className = 'seal-block';
-                seat_seal.src = "image/seat.png";
-                seat_seal.className = "seal"
-                seat_seal.hidden = !user_data['seat'];
-                seat_td.onclick = async () => {
-                    if (seat_seal.hidden) {
-                        seat_seal.hidden = false;
-                        user_data['point'] += 1;
-                        user_data['seat'] = true;
-                        total_point += 1;
-                    }
-                    else {
-                        seat_seal.hidden = true;
-                        user_data['point'] -= 1;
-                        user_data['seat'] = false;
-                        total_point -= 1;
-                    }
-                    await db.collection(group).doc(today).update({ [student]: user_data });
-                    await db.collection('kids').doc(student).update({ ['total_point']: total_point });
-                    total_score.textContent = `+ ${total_point}`;
-                    score.textContent = `+ ${user_data['point']}`;
-                };
-                seat_td.appendChild(seat_seal);
-                studentDiv.appendChild(seat_td);
+                card.appendChild(sealRow);
 
-                // 小組+1按鈕
-                const small_group_td = document.createElement('td');
-                const small_group_seal = document.createElement('img');
-                small_group_td.className = 'seal-block';
-                small_group_seal.src = "image/small_group.png";
-                small_group_seal.className = "seal"
-                small_group_seal.hidden = !user_data['small_group'];
-                small_group_td.onclick = async () => {
-                    if (small_group_seal.hidden) {
-                        small_group_seal.hidden = false;
-                        user_data['point'] += 1;
-                        user_data['small_group'] = true;
-                        total_point += 1;
-                    }
-                    else {
-                        small_group_seal.hidden = true;
-                        user_data['point'] -= 1;
-                        user_data['small_group'] = false;
-                        total_point -= 1;
-                    }
-                    await db.collection(group).doc(today).update({ [student]: user_data });
-                    await db.collection('kids').doc(student).update({ ['total_point']: total_point });
-                    total_score.textContent = `+ ${total_point}`;
-                    score.textContent = `+ ${user_data['point']}`;
-                };
-                small_group_td.appendChild(small_group_seal);
-                studentDiv.appendChild(small_group_td);
+                // Extra points
+                const extraRow = document.createElement('div');
+                extraRow.className = 'extra-row';
 
-                // 額外加分
-                const addition_td = document.createElement('td');
-                const addition_input = document.createElement('input');
-                addition_input.type = 'number';
-                addition_input.className = 'addition_input';
-                addition_input.min = 0;
-                addition_input.max = 100;
-                addition_input.step = 1;
-                addition_input.value = user_data['addition'];
+                const extraLabel = document.createElement('label');
+                extraLabel.textContent = '額外加點';
 
-                let pre_additional = user_data['addition'];
-                addition_input.addEventListener('change', async () => {
-                    total_point += (addition_input.value - pre_additional);
-                    user_data['point'] += (addition_input.value - pre_additional);
-                    pre_additional = addition_input.value;
-                    user_data['addition'] = addition_input.value;
+                const extraInput = document.createElement('input');
+                extraInput.type = 'number';
+                extraInput.min = 0; extraInput.max = 100; extraInput.step = 1;
+                extraInput.value = user_data['addition'];
 
-                    await db.collection(group).doc(today).update({ [student]: user_data });
-                    await db.collection('kids').doc(student).update({ ['total_point']: total_point });
-                    total_score.textContent = `+ ${total_point}`;
-                    score.textContent = `+ ${user_data['point']}`;
-
+                let pre = user_data['addition'];
+                extraInput.addEventListener('change', async () => {
+                    const diff = Number(extraInput.value) - Number(pre);
+                    total_point += diff;
+                    user_data['point'] += diff;
+                    pre = extraInput.value;
+                    user_data['addition'] = extraInput.value;
+                    await updateDB();
                 });
-                addition_td.appendChild(addition_input);
-                studentDiv.appendChild(addition_td);
 
-                studentsScoresDiv.appendChild(studentDiv);
+                extraRow.appendChild(extraLabel);
+                extraRow.appendChild(extraInput);
+                card.appendChild(extraRow);
+
+                panel.appendChild(card);
             });
         }
-    }
 
-    function parameter() {
-        // 將參數附加到各個鏈接上
-        document.getElementById("signinLink").href = "signin.html?group=" + group;
-        document.getElementById("newFriendLink").href = "newfriend.html?group=" + group;
-        document.getElementById("managerLink").href = "manager.html?group=" + group;
-    }
-
-    document.addEventListener("DOMContentLoaded", async function () {
-        if (group === "null") {
-            window.location.href = "index.html";
+        function parameter() {
+            document.getElementById("signinLink").href = "signin.html?group=" + group;
+            document.getElementById("newFriendLink").href = "newfriend.html?group=" + group;
+            document.getElementById("managerLink").href = "manager.html?group=" + group;
         }
-        parameter();
 
-        creatTable();
-    });
-</script>
+        document.addEventListener("DOMContentLoaded", async function () {
+            if (!group || group === "null") { window.location.href = "index.html"; return; }
+            parameter();
+            creatTable();
+        });
+    </script>
+</body>
 
 </html>

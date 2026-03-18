@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 
 <head>
     <meta charset="UTF-8">
@@ -7,44 +7,116 @@
     <script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
     <title>北區會堂兒崇點數系統</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="normal.css">
+    <style>
+        /* 全員到場 banner */
+        #students-all-arrive .all-here {
+            text-align: center;
+            padding: 48px 24px;
+            color: #10B981;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        /* 組別 section 標題 */
+        .group-header {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: .7px;
+            text-transform: uppercase;
+            color: var(--text-sub);
+            margin: 20px 0 10px;
+        }
+        .group-header:first-child { margin-top: 0; }
+
+        /* 點名按鈕 */
+        .group .button {
+            font-size: 17px;
+            font-weight: 600;
+            height: 56px;
+            border-radius: 10px;
+        }
+
+        /* loading spinner */
+        .loader {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 60px;
+            color: var(--text-sub);
+            font-size: 15px;
+            gap: 10px;
+        }
+        .spinner {
+            width: 22px; height: 22px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
 </head>
 
 <body>
     <div class="header">
-        <div id="sys-title">北區會堂兒崇點數系統</div>
+        <div id="sys-title">北區會堂兒崇</div>
         <ul>
-            <li class="is-active"><a href="#" id="signinLink">簽到</a></li>
-            <li><a href="#" id="scoreLink">加分</a></li>
-            <li><a href="#" id="newFriendLink">新朋友</a></li>
-            <li><a href="#" id="managerLink">管理員</a></li>
+            <li class="is-active"><a href="#" id="signinLink">✅ 簽到</a></li>
+            <li><a href="#" id="scoreLink">⭐ 加分</a></li>
+            <li><a href="#" id="newFriendLink">🌟 新朋友</a></li>
+            <li><a href="#" id="managerLink">⚙️ 管理員</a></li>
         </ul>
     </div>
+
     <div class="content">
+        <div>
+            <div class="section-title">今日點名</div>
+            <div class="section-sub" id="date-label"></div>
+        </div>
+
         <div id="students-all-arrive"></div>
-        <div class="group" id="group-big"></div>
-        <div class="group" id="group-medium"></div>
-        <div class="group" id="group-small"></div>
+
+        <div id="group-big-wrap" style="display:none">
+            <div class="group-header">🔴 大寶</div>
+            <div class="group" id="group-big"></div>
+        </div>
+
+        <div id="group-medium-wrap" style="display:none">
+            <div class="group-header">🔵 中寶</div>
+            <div class="group" id="group-medium"></div>
+        </div>
+
+        <div id="group-small-wrap" style="display:none">
+            <div class="group-header">🟢 小寶</div>
+            <div class="group" id="group-small"></div>
+        </div>
+
+        <div class="loader" id="loader">
+            <div class="spinner"></div> 載入中…
+        </div>
     </div>
+
     <script src="init_firestore.js"></script>
     <script>
-        // const Today = new Date();
-        // const yesterday = new Date(Today);
-        // yesterday.setDate(Today.getDate() - 25);
         const today = new Date().toISOString().slice(2, 10).replace(/-/g, '');
-        // const today = yesterday.toISOString().slice(2, 10).replace(/-/g, '');
-
-        // 解析 URL 中的參數
         const urlParams = new URLSearchParams(window.location.search);
         const group = urlParams.get('group');
+
+        // Show today's date nicely
+        const d = new Date();
+        document.getElementById('date-label').textContent =
+            `${d.getFullYear()} 年 ${d.getMonth()+1} 月 ${d.getDate()} 日`;
 
         async function load_signin() {
             var students = [];
             const group_name = ['小寶', '中寶', '大寶'];
-            for (let group of group_name) {
-                const snapshot = await db.collection(group).doc(today).get();
+            for (let g of group_name) {
+                const snapshot = await db.collection(g).doc(today).get();
                 if (snapshot.exists) {
-                    students = students.concat(Object.keys(snapshot.data()));  // 提取所有字段名稱（鍵）並存為數組
+                    students = students.concat(Object.keys(snapshot.data()));
                 }
             }
             return students;
@@ -52,91 +124,85 @@
 
         async function load_all_students() {
             let students = {};
-            // 从 kids collection 中抓取学生名单
-            const snapshot = await db.collection('kids').get();  // 使用 await 等待 Promise 完成
+            const snapshot = await db.collection('kids').get();
             snapshot.forEach(doc => {
-                const studentName = doc.id;
-                students[studentName] = doc.data()['group'];
+                students[doc.id] = doc.data()['group'];
             });
-            // console.log(students);
             return students;
         }
 
         function createButton(studentNames) {
-            var studentsDiv = document.getElementById('students-all-arrive');
-            studentsDiv.innerHTML = '';  // 清空之前的按钮，以便重新创建
+            document.getElementById('loader').style.display = 'none';
+            const studentsDiv = document.getElementById('students-all-arrive');
+            studentsDiv.innerHTML = '';
+
             if (Object.keys(studentNames).length === 0) {
-                const nobody = document.createElement('h1');
-                nobody.className = 'title';
-                nobody.textContent = "大家都到囉!!!";
-                studentsDiv.appendChild(nobody);
+                studentsDiv.innerHTML = '<div class="all-here">🎉 大家都到囉！</div>';
+                return;
             }
-            else {
-                Object.entries(studentNames).forEach(([name, group]) => {
-                    const studentButton = document.createElement('button');
-                    if (group == '大寶') {
-                        studentButton.className = 'button red';
-                        studentsDiv = document.getElementById('group-big');
-                    }
-                    else if (group == '中寶') {
-                        studentButton.className = 'button blue';
-                        studentsDiv = document.getElementById('group-medium');
-                    }
-                    else {
-                        studentButton.className = 'button green';
-                        studentsDiv = document.getElementById('group-small');
-                    }
-                    studentButton.textContent = name;
 
-                    // 點名按鈕功能
-                    studentButton.onclick = async () => {
-                        const JSON = {
-                            point: 0,
-                            ontime: false,
-                            seat: false,
-                            small_group: false,
-                            praise: false,
-                            addition: 0
-                        }
-                        const snapshot = await db.collection(group).doc(today).set({ [name]: JSON }, { merge: true });
-                        // window.location.reload();
-                        studentButton.remove();
+            // Show wrappers
+            const bigWrap = document.getElementById('group-big-wrap');
+            const midWrap = document.getElementById('group-medium-wrap');
+            const smlWrap = document.getElementById('group-small-wrap');
+
+            Object.entries(studentNames).forEach(([name, grp]) => {
+                const btn = document.createElement('button');
+                let colorClass = 'green';
+                let targetDiv = document.getElementById('group-small');
+                let wrap = smlWrap;
+
+                if (grp === '大寶') {
+                    colorClass = 'red';
+                    targetDiv = document.getElementById('group-big');
+                    wrap = bigWrap;
+                } else if (grp === '中寶') {
+                    colorClass = 'blue';
+                    targetDiv = document.getElementById('group-medium');
+                    wrap = midWrap;
+                }
+
+                btn.className = `button ${colorClass}`;
+                btn.textContent = name;
+                wrap.style.display = 'block';
+
+                btn.onclick = async () => {
+                    btn.disabled = true;
+                    btn.style.opacity = '.5';
+                    const data = {
+                        point: 0, ontime: false, seat: false,
+                        small_group: false, praise: false, addition: 0
                     };
+                    await db.collection(grp).doc(today).set({ [name]: data }, { merge: true });
+                    btn.remove();
+                    // Hide wrapper if empty
+                    if (targetDiv.children.length === 0) wrap.style.display = 'none';
+                };
 
-                    studentsDiv.appendChild(studentButton);
-                    // studentsDiv.appendChild(document.createElement('br'));
-                });
-            }
+                targetDiv.appendChild(btn);
+            });
         }
 
         async function getDifference() {
-            var allStudents = await load_all_students();  // 获取所有学生名单
-            var SigninStudents = await load_signin();  // 获取签到学生名单
-            // 计算差集
-            // 删除已签到学生
-            console.log(allStudents);
-            console.log(SigninStudents);
-            SigninStudents.forEach(student => {
-                delete allStudents[student];
-            });
-            console.log(allStudents);
+            const allStudents = await load_all_students();
+            const SigninStudents = await load_signin();
+            SigninStudents.forEach(s => delete allStudents[s]);
             return allStudents;
         }
 
         function parameter() {
-            // 將參數附加到各個鏈接上
             document.getElementById("scoreLink").href = "score.html?group=" + group;
             document.getElementById("newFriendLink").href = "newfriend.html?group=" + group;
             document.getElementById("managerLink").href = "manager.html?group=" + group;
         }
 
         document.addEventListener("DOMContentLoaded", async function () {
-            if (group === "null") {
+            if (!group || group === "null") {
                 window.location.href = "index.html";
+                return;
             }
             parameter();
-
-            var difference = await getDifference();
+            const difference = await getDifference();
             createButton(difference);
         });
     </script>
