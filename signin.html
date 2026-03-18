@@ -29,11 +29,14 @@
             color: var(--text-sub);
             margin: 20px 0 10px;
         }
-        .group-header:first-child { margin-top: 0; }
+
+        .group-header:first-child {
+            margin-top: 0;
+        }
 
         /* 點名按鈕 */
         .group .button {
-            font-size: 17px;
+            font-size: 20px;
             font-weight: 600;
             height: 56px;
             border-radius: 10px;
@@ -49,14 +52,21 @@
             font-size: 15px;
             gap: 10px;
         }
+
         .spinner {
-            width: 22px; height: 22px;
+            width: 22px;
+            height: 22px;
             border: 3px solid var(--border);
             border-top-color: var(--primary);
             border-radius: 50%;
             animation: spin .7s linear infinite;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 
@@ -108,7 +118,7 @@
         // Show today's date nicely
         const d = new Date();
         document.getElementById('date-label').textContent =
-            `${d.getFullYear()} 年 ${d.getMonth()+1} 月 ${d.getDate()} 日`;
+            `${d.getFullYear()} 年 ${d.getMonth() + 1} 月 ${d.getDate()} 日`;
 
         async function load_signin() {
             var students = [];
