@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
         :root {
             --primary: #FF5A5F;
             --bg: #FFFFFF;
@@ -20,7 +21,14 @@
             --font: 'Inter', 'Noto Sans TC', Arial, sans-serif;
             --radius: 12px;
         }
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
         body {
             font-family: var(--font);
@@ -37,12 +45,14 @@
             padding: 20px 24px 8px;
             text-align: center;
         }
+
         .logo {
             font-size: 28px;
             font-weight: 700;
             color: var(--primary);
             letter-spacing: -0.5px;
         }
+
         .subtitle {
             font-size: 14px;
             color: var(--text-sub);
@@ -91,11 +101,15 @@
             transition: border-color .2s, box-shadow .2s, transform .1s;
             text-decoration: none;
         }
+
         .group-btn:hover {
             border-color: var(--primary);
-            box-shadow: 0 2px 12px rgba(255,90,95,.15);
+            box-shadow: 0 2px 12px rgba(255, 90, 95, .15);
         }
-        .group-btn:active { transform: scale(.98); }
+
+        .group-btn:active {
+            transform: scale(.98);
+        }
 
         .group-btn .badge {
             font-size: 12px;
@@ -104,9 +118,18 @@
             border-radius: 999px;
             color: #fff;
         }
-        .badge.red    { background: #FF5A5F; }
-        .badge.blue   { background: #0EA5E9; }
-        .badge.green  { background: #10B981; }
+
+        .badge.red {
+            background: #FF5A5F;
+        }
+
+        .badge.blue {
+            background: #0EA5E9;
+        }
+
+        .badge.green {
+            background: #10B981;
+        }
 
         .arrow {
             color: var(--text-sub);
@@ -144,7 +167,7 @@
         <button class="group-btn" onclick="signin('大寶')">
             <span>大寶</span>
             <div style="display:flex;align-items:center;gap:10px;">
-                <span class="badge red">大班</span>
+                <span class="badge red">小四~小六</span>
                 <span class="arrow">›</span>
             </div>
         </button>
@@ -152,7 +175,7 @@
         <button class="group-btn" onclick="signin('中寶')">
             <span>中寶</span>
             <div style="display:flex;align-items:center;gap:10px;">
-                <span class="badge blue">中班</span>
+                <span class="badge blue">小一~小三</span>
                 <span class="arrow">›</span>
             </div>
         </button>
@@ -160,7 +183,7 @@
         <button class="group-btn" onclick="signin('小寶')">
             <span>小寶</span>
             <div style="display:flex;align-items:center;gap:10px;">
-                <span class="badge green">小班</span>
+                <span class="badge green">幼稚園</span>
                 <span class="arrow">›</span>
             </div>
         </button>

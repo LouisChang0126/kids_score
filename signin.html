@@ -148,10 +148,6 @@
 
             Object.entries(studentNames).forEach(([name, grp]) => {
                 const btn = document.createElement('button');
-                let colorClass = 'green';
-                let targetDiv = document.getElementById('group-small');
-                let wrap = smlWrap;
-
                 if (grp === '大寶') {
                     colorClass = 'red';
                     targetDiv = document.getElementById('group-big');
@@ -160,6 +156,12 @@
                     colorClass = 'blue';
                     targetDiv = document.getElementById('group-medium');
                     wrap = midWrap;
+                } else if (grp === '小寶') {
+                    colorClass = 'green';
+                    targetDiv = document.getElementById('group-small');
+                    wrap = smlWrap;
+                } else {
+                    return; // 忽略「隱藏」、「新世代」或其他不相關組別
                 }
 
                 btn.className = `button ${colorClass}`;
